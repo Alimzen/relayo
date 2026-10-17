@@ -1,0 +1,54 @@
+{
+  "name": "@relayo/ses",
+  "version": "0.0.0",
+  "description": "Amazon SES driver for Relayo: sending through SESv2 and normalized events from SNS.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=20"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "@relayo/source": "./src/index.ts",
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "relayo",
+    "ses",
+    "aws",
+    "email",
+    "bounces",
+    "sns"
+  ],
+  "dependencies": {
+    "@aws-sdk/client-sesv2": "^3.1152.0"
+  },
+  "peerDependencies": {
+    "@relayo/core": "workspace:^"
+  },
+  "devDependencies": {
+    "@relayo/core": "workspace:^"
+  }
+}

@@ -1,0 +1,225 @@
+{
+  "_source": "Modeled on the examples in the Amazon SES Developer Guide (event publishing and notification contents). Replace with payloads captured from a real account when available.",
+
+  "bounceUserUnknown": {
+    "eventType": "Bounce",
+    "bounce": {
+      "feedbackId": "0102017e8f8a1b2c-11111111-2222-3333-4444-555555555555-000000",
+      "bounceType": "Permanent",
+      "bounceSubType": "General",
+      "bouncedRecipients": [
+        {
+          "emailAddress": "cliente@example.com",
+          "action": "failed",
+          "status": "5.1.1",
+          "diagnosticCode": "smtp; 550 5.1.1 user unknown"
+        }
+      ],
+      "timestamp": "2026-10-17T10:00:02.669Z",
+      "reportingMTA": "dsn; e226-55.smtp-out.us-east-1.amazonses.com"
+    },
+    "mail": {
+      "timestamp": "2026-10-17T10:00:01.000Z",
+      "source": "Facturas <facturas@empresa.com>",
+      "sourceArn": "arn:aws:ses:us-east-1:123456789012:identity/empresa.com",
+      "sendingAccountId": "123456789012",
+      "messageId": "0100017e8f8a0a0a-aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee-000000",
+      "destination": ["cliente@example.com"],
+      "headersTruncated": false,
+      "headers": [
+        { "name": "From", "value": "Facturas <facturas@empresa.com>" },
+        { "name": "To", "value": "cliente@example.com" },
+        { "name": "Subject", "value": "Tu factura de octubre" },
+        { "name": "X-Relayo-Message-ID", "value": "7b1f3c9e-6a4d-4c1e-9d2b-1f0e8a7c6b5d" },
+        { "name": "X-Relayo-Metadata", "value": "eyJmYWN0dXJhSWQiOiIxMjMifQ" }
+      ],
+      "commonHeaders": {
+        "from": ["Facturas <facturas@empresa.com>"],
+        "to": ["cliente@example.com"],
+        "messageId": "0100017e8f8a0a0a-aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee-000000",
+        "subject": "Tu factura de octubre"
+      },
+      "tags": {
+        "ses:configuration-set": ["relayo"],
+        "ses:source-ip": ["192.0.2.0"],
+        "ses:from-domain": ["empresa.com"],
+        "ses:caller-identity": ["relayo-app"],
+        "relayo_message_id": ["7b1f3c9e-6a4d-4c1e-9d2b-1f0e8a7c6b5d"]
+      }
+    }
+  },
+
+  "bounceBlocklisted": {
+    "eventType": "Bounce",
+    "bounce": {
+      "feedbackId": "0102017e8f8a1b2c-blocked",
+      "bounceType": "Permanent",
+      "bounceSubType": "General",
+      "bouncedRecipients": [
+        {
+          "emailAddress": "cliente@example.com",
+          "action": "failed",
+          "status": "5.7.1",
+          "diagnosticCode": "smtp; 554 5.7.1 Service unavailable; Client host [192.0.2.0] blocked using zen.spamhaus.org"
+        }
+      ],
+      "timestamp": "2026-10-17T10:00:02.669Z"
+    },
+    "mail": {
+      "timestamp": "2026-10-17T10:00:01.000Z",
+      "messageId": "0100017e-blocked",
+      "destination": ["cliente@example.com"],
+      "tags": { "relayo_message_id": ["msg-blocked"] }
+    }
+  },
+
+  "bounceMailboxFull": {
+    "eventType": "Bounce",
+    "bounce": {
+      "feedbackId": "0102017e-full",
+      "bounceType": "Transient",
+      "bounceSubType": "MailboxFull",
+      "bouncedRecipients": [{ "emailAddress": "lleno@example.com" }],
+      "timestamp": "2026-10-17T10:00:02.669Z"
+    },
+    "mail": {
+      "timestamp": "2026-10-17T10:00:01.000Z",
+      "messageId": "0100017e-full",
+      "destination": ["lleno@example.com"],
+      "tags": { "relayo_message_id": ["msg-full"] }
+    }
+  },
+
+  "bounceSuppressed": {
+    "eventType": "Bounce",
+    "bounce": {
+      "feedbackId": "0102017e-suppressed",
+      "bounceType": "Permanent",
+      "bounceSubType": "OnAccountSuppressionList",
+      "bouncedRecipients": [
+        {
+          "emailAddress": "suprimido@example.com",
+          "action": "failed",
+          "status": "5.1.1",
+          "diagnosticCode": "Amazon SES did not send the message to this address because it is on the suppression list for your account."
+        }
+      ],
+      "timestamp": "2026-10-17T10:00:02.669Z"
+    },
+    "mail": {
+      "timestamp": "2026-10-17T10:00:01.000Z",
+      "messageId": "0100017e-suppressed",
+      "destination": ["suprimido@example.com"],
+      "tags": { "relayo_message_id": ["msg-suppressed"] }
+    }
+  },
+
+  "complaint": {
+    "eventType": "Complaint",
+    "complaint": {
+      "feedbackId": "0102017e-complaint",
+      "complaintSubType": null,
+      "complainedRecipients": [{ "emailAddress": "cliente@example.com" }],
+      "timestamp": "2026-10-17T11:00:00.000Z",
+      "userAgent": "Mozilla/5.0",
+      "complaintFeedbackType": "abuse",
+      "arrivalDate": "2026-10-17T10:59:00.000Z"
+    },
+    "mail": {
+      "timestamp": "2026-10-17T10:00:01.000Z",
+      "messageId": "0100017e-complaint",
+      "destination": ["cliente@example.com"],
+      "tags": { "relayo_message_id": ["msg-complaint"] }
+    }
+  },
+
+  "delivery": {
+    "eventType": "Delivery",
+    "delivery": {
+      "timestamp": "2026-10-17T10:00:03.000Z",
+      "processingTimeMillis": 1500,
+      "recipients": ["a@example.com", "b@example.com"],
+      "smtpResponse": "250 2.6.0 Message received",
+      "reportingMTA": "e226-55.smtp-out.us-east-1.amazonses.com"
+    },
+    "mail": {
+      "timestamp": "2026-10-17T10:00:01.000Z",
+      "messageId": "0100017e-delivery",
+      "destination": ["a@example.com", "b@example.com"],
+      "tags": { "relayo_message_id": ["msg-delivery"] }
+    }
+  },
+
+  "deliveryDelay": {
+    "eventType": "DeliveryDelay",
+    "deliveryDelay": {
+      "timestamp": "2026-10-17T10:30:00.000Z",
+      "delayType": "TransientCommunicationFailure",
+      "expirationTime": "2026-10-18T10:00:00.000Z",
+      "delayedRecipients": [
+        { "emailAddress": "lento@example.com", "status": "4.4.1", "diagnosticCode": "smtp; 421 4.4.1 Unable to connect to remote host" }
+      ]
+    },
+    "mail": {
+      "timestamp": "2026-10-17T10:00:01.000Z",
+      "messageId": "0100017e-delay",
+      "destination": ["lento@example.com"],
+      "tags": { "relayo_message_id": ["msg-delay"] }
+    }
+  },
+
+  "send": {
+    "eventType": "Send",
+    "send": {},
+    "mail": {
+      "timestamp": "2026-10-17T10:00:01.000Z",
+      "messageId": "0100017e-send",
+      "destination": ["cliente@example.com"],
+      "tags": { "relayo_message_id": ["msg-send"] }
+    }
+  },
+
+  "reject": {
+    "eventType": "Reject",
+    "reject": { "reason": "Bad content" },
+    "mail": {
+      "timestamp": "2026-10-17T10:00:01.000Z",
+      "messageId": "0100017e-reject",
+      "destination": ["cliente@example.com"],
+      "tags": { "relayo_message_id": ["msg-reject"] }
+    }
+  },
+
+  "click": {
+    "eventType": "Click",
+    "click": {
+      "ipAddress": "192.0.2.1",
+      "link": "https://empresa.com/factura/123",
+      "linkTags": { "samplekey0": ["samplevalue0"] },
+      "timestamp": "2026-10-17T12:00:00.000Z",
+      "userAgent": "Mozilla/5.0"
+    },
+    "mail": {
+      "timestamp": "2026-10-17T10:00:01.000Z",
+      "messageId": "0100017e-click",
+      "destination": ["cliente@example.com"],
+      "tags": { "relayo_message_id": ["msg-click"] }
+    }
+  },
+
+  "notificationBounce": {
+    "notificationType": "Bounce",
+    "bounce": {
+      "feedbackId": "000001378603177f-notification",
+      "bounceType": "Permanent",
+      "bounceSubType": "NoEmail",
+      "bouncedRecipients": [{ "emailAddress": "noexiste@example.com" }],
+      "timestamp": "2026-10-17T10:00:02.000Z"
+    },
+    "mail": {
+      "timestamp": "2026-10-17T10:00:01.000Z",
+      "messageId": "000001378603177f-notification-msg",
+      "destination": ["noexiste@example.com"]
+    }
+  }
+}
