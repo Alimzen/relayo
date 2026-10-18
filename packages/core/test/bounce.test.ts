@@ -7,6 +7,8 @@ describe('classifyBounce', () => {
     [{ smtpCode: 550, enhancedCode: '5.1.1', diagnostic: '550 5.1.1 User unknown' }, 'hard', 'user_unknown'],
     [{ diagnostic: 'smtp; 550 5.1.10 RESOLVER.ADR.RecipientNotFound; Recipient not found by SMTP address lookup' }, 'hard', 'user_unknown'],
     [{ diagnostic: '556 5.1.10 Recipient address has null MX' }, 'hard', 'domain_invalid'],
+    [{ diagnostic: '550 5.1.2 Host or domain name not found. Name service error for name=example.invalid' }, 'hard', 'domain_invalid'],
+    [{ diagnostic: '550 5.1.2 Domain not found' }, 'hard', 'domain_invalid'],
     [{ diagnostic: 'smtp; 550 5.1.2 Bad destination host' }, 'hard', 'domain_invalid'],
     [{ diagnostic: "550-5.2.1 The email account that you tried to reach is disabled" }, 'hard', 'mailbox_disabled'],
     [{ diagnostic: 'smtp; 552 5.2.2 Mailbox full' }, 'soft', 'mailbox_full'],

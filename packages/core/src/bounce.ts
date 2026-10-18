@@ -27,7 +27,7 @@ const TEXT_RULES: Array<[RegExp, BounceReason]> = [
   [/spam|content (rejected|refused)|virus|malware|phish/i, 'content_rejected'],
   [/quota|mailbox (is )?full|over ?quota|insufficient (storage|space)/i, 'mailbox_full'],
   [/disabled|inactive|suspended|deactivated|account (has been )?closed/i, 'mailbox_disabled'],
-  [/no mx|domain (not found|does not exist)|host (not found|unknown)|unrouteable|no such domain|nxdomain/i, 'domain_invalid'],
+  [/no mx|null mx|domain( name)? (not found|does not exist)|host (not found|unknown)|name service error|unrouteable|no such domain|nxdomain/i, 'domain_invalid'],
   [/user unknown|unknown user|no such (user|recipient|mailbox)|does ?n[o']t exist|invalid (recipient|mailbox|address)|recipient (address )?rejected|address rejected|mailbox unavailable|not found/i, 'user_unknown'],
   [/polic(y|ies)|blocked|denied|refused|prohibited/i, 'policy_block'],
 ];
@@ -94,7 +94,7 @@ export function classifyBounce(input: BounceInput): BounceClassification {
   let reason: BounceReason;
   if (fromCode === 'policy_block' && fromText && SENDER_SIDE.has(fromText)) reason = fromText;
   // RFC 7505 reserves X.1.10 for null MX, but Microsoft 365 also sends it for unknown users.
-  else if (fromCode === 'domain_invalid' && fromText === 'user_unknown') reason = fromText;
+  else if (enhanced?.[2] === '1' && enhanced[3] === '10' && fromText === 'user_unknown') reason = fromText;
   else reason = fromCode ?? fromText ?? (permanent ? 'unknown' : 'temporary_failure');
 
   return { bounceType: typeFor(reason, permanent), reason };
