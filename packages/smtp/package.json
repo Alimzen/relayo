@@ -1,5 +1,5 @@
 {
-  "name": "@relayo/smtp",
+  "name": "@alimzen/smtp",
   "version": "0.1.0",
   "description": "SMTP driver for Relayo, built on Nodemailer.",
   "license": "MIT",
@@ -23,7 +23,7 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "@relayo/source": "./src/index.ts",
+      "@alimzen/source": "./src/index.ts",
       "import": {
         "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
@@ -54,10 +54,10 @@
     "nodemailer": "^10.1.2"
   },
   "peerDependencies": {
-    "@relayo/core": ">=0.1.0 <1.0.0"
+    "@alimzen/core": ">=0.1.0 <1.0.0"
   },
   "devDependencies": {
-    "@relayo/core": "workspace:^",
+    "@alimzen/core": "workspace:^",
     "@types/smtp-server": "^3.5.13",
     "smtp-server": "^3.19.23"
   },

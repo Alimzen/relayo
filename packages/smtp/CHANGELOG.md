@@ -1,4 +1,4 @@
-# @relayo/smtp
+# @alimzen/smtp
 
 ## 0.1.0
 

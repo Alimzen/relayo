@@ -6,7 +6,7 @@ import {
   RejectedError,
   ValidationError,
   type RelayoError,
-} from '@relayo/core';
+} from '@alimzen/core';
 
 /** Fields of an AWS SDK error kept in `RelayoError.raw`. */
 export interface SesErrorDetails {

@@ -6,7 +6,7 @@ import {
   RejectedError,
   ValidationError,
   type RelayoError,
-} from '@relayo/core';
+} from '@alimzen/core';
 import type { NodemailerError } from 'nodemailer';
 
 /** Fields of a Nodemailer error kept in `RelayoError.raw`. */

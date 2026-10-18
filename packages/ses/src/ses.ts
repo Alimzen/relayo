@@ -16,7 +16,7 @@ import {
   type SendContext,
   type SendResult,
   type WebhookRequest,
-} from '@relayo/core';
+} from '@alimzen/core';
 import { toRelayoError } from './errors.js';
 import {
   encodeMetadata,

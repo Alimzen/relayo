@@ -7,7 +7,7 @@ import {
   type RejectEvent,
   type RejectReason,
   type RelayoEvent,
-} from '@relayo/core';
+} from '@alimzen/core';
 
 /** custom_args the driver sets on every message; SendGrid echoes them on each event. */
 export const MESSAGE_ID_ARG = 'relayo_message_id';

@@ -1,17 +1,17 @@
-# @relayo/sendgrid
+# @alimzen/sendgrid
 
 SendGrid driver for [Relayo](../core): sends through the v3 Mail Send API and turns the signed Event
 Webhook into Relayo events. No SDK, no runtime dependencies: it uses Node's `fetch`.
 
 ```sh
-npm install @relayo/core @relayo/sendgrid
+npm install @alimzen/core @alimzen/sendgrid
 ```
 
 ## Sending
 
 ```ts
-import { createRelayo } from '@relayo/core';
-import { sendgrid } from '@relayo/sendgrid';
+import { createRelayo } from '@alimzen/core';
+import { sendgrid } from '@alimzen/sendgrid';
 
 const relayo = createRelayo({
   email: sendgrid({

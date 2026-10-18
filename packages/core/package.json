@@ -1,5 +1,5 @@
 {
-  "name": "@relayo/core",
+  "name": "@alimzen/core",
   "version": "0.1.0",
   "description": "Provider-agnostic messaging for Node: one API to send email and SMS, and normalized delivery events.",
   "license": "MIT",
@@ -23,7 +23,7 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "@relayo/source": "./src/index.ts",
+      "@alimzen/source": "./src/index.ts",
       "import": {
         "types": "./dist/index.d.ts",
         "default": "./dist/index.js"

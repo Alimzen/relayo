@@ -9,9 +9,9 @@ has real costs, like marking good contacts invalid because your own IP got block
 Relayo gives you one API to send, and one set of events to react to, whatever provider is underneath.
 
 ```ts
-import { createRelayo, failover } from '@relayo/core';
-import { ses } from '@relayo/ses';
-import { sendgrid } from '@relayo/sendgrid';
+import { createRelayo, failover } from '@alimzen/core';
+import { ses } from '@alimzen/ses';
+import { sendgrid } from '@alimzen/sendgrid';
 
 const relayo = createRelayo({
   email: failover([ses({ region: 'us-east-1' }), sendgrid({ apiKey: process.env.SENDGRID_API_KEY! })]),
@@ -32,17 +32,17 @@ relayo.on('bounced', (event) => {
 });
 ```
 
-> **Status:** pre-release (0.x), not yet published to npm. APIs may still change.
+> **Status:** pre-release (0.x). APIs may still change.
 
 ## Packages
 
 | Package | What it does |
 | --- | --- |
-| [`@relayo/core`](packages/core) | `createRelayo`, message/event/error contracts, `failover()`, `classifyBounce`, in-memory test driver |
-| [`@relayo/smtp`](packages/smtp) | Any SMTP server, built on Nodemailer |
-| [`@relayo/ses`](packages/ses) | Amazon SES (v2 API), events through SNS with signature verification |
-| [`@relayo/sendgrid`](packages/sendgrid) | SendGrid v3 API, signed Event Webhook |
-| [`@relayo/nestjs`](packages/nestjs) | `RelayoModule`, injectable `RelayoService`, `@OnRelayoEvent()`, webhook controller |
+| [`@alimzen/core`](packages/core) | `createRelayo`, message/event/error contracts, `failover()`, `classifyBounce`, in-memory test driver |
+| [`@alimzen/smtp`](packages/smtp) | Any SMTP server, built on Nodemailer |
+| [`@alimzen/ses`](packages/ses) | Amazon SES (v2 API), events through SNS with signature verification |
+| [`@alimzen/sendgrid`](packages/sendgrid) | SendGrid v3 API, signed Event Webhook |
+| [`@alimzen/nestjs`](packages/nestjs) | `RelayoModule`, injectable `RelayoService`, `@OnRelayoEvent()`, webhook controller |
 
 SMS (Twilio) and more email providers (Mailgun, Postmark, Resend) are on the roadmap.
 

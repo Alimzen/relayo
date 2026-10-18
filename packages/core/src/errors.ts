@@ -6,10 +6,10 @@ export interface RelayoErrorOptions {
 
 /**
  * Marks Relayo errors across copies of this package. When an app ends up with two copies of
- * `@relayo/core` (ESM and CJS builds side by side, or two versions), `instanceof` on the class alone
+ * `@alimzen/core` (ESM and CJS builds side by side, or two versions), `instanceof` on the class alone
  * would fail and a driver's error would no longer be recognized as retryable, as a bad signature, etc.
  */
-const BRAND = Symbol.for('@relayo/core:error');
+const BRAND = Symbol.for('@alimzen/core:error');
 
 export abstract class RelayoError extends Error {
   abstract readonly code: string;

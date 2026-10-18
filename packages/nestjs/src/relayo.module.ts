@@ -1,6 +1,6 @@
 import { Module, type DynamicModule, type InjectionToken, type ModuleMetadata, type Provider } from '@nestjs/common';
 import { DiscoveryModule } from '@nestjs/core';
-import { createRelayo, type RelayoConfig } from '@relayo/core';
+import { createRelayo, type RelayoConfig } from '@alimzen/core';
 import { RELAYO_CLIENT, RELAYO_OPTIONS } from './constants.js';
 import { RelayoEventsExplorer } from './relayo-events.explorer.js';
 import { RelayoService } from './relayo.service.js';

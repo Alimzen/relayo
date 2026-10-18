@@ -10,7 +10,7 @@ import type {
   RelayoEvent,
   SmsMessage,
   WebhookRequest,
-} from '@relayo/core';
+} from '@alimzen/core';
 import { RELAYO_CLIENT } from './constants.js';
 
 /** Injectable facade over the `Relayo` instance configured in `RelayoModule`. */

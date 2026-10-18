@@ -9,8 +9,8 @@ import {
   type EmailMessage,
   type MemoryDriver,
   type RelayoEvent,
-} from '@relayo/core';
-import { sendgrid, SIGNATURE_HEADER, TIMESTAMP_HEADER } from '@relayo/sendgrid';
+} from '@alimzen/core';
+import { sendgrid, SIGNATURE_HEADER, TIMESTAMP_HEADER } from '@alimzen/sendgrid';
 import { afterEach, describe, expect, it } from 'vitest';
 import {
   OnRelayoEvent,

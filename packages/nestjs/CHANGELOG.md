@@ -1,4 +1,4 @@
-# @relayo/nestjs
+# @alimzen/nestjs
 
 ## 0.1.0
 

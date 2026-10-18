@@ -7,15 +7,15 @@ Contexto completo, roadmap, contratos y ADRs: [docs/contexto.md](docs/contexto.m
 ## Repo
 
 - Monorepo pnpm (`packages/*`) + Changesets. Las herramientas (TypeScript, tsup, Vitest) están en la raíz.
-- `packages/core` → `@relayo/core`: tipos en `src/types/`, errores en `src/errors.ts`, `createRelayo` en `src/relayo.ts`, `failover()` en `src/failover.ts`, `classifyBounce` en `src/bounce.ts`, driver `memory()` para tests.
-- `packages/smtp` → `@relayo/smtp`: driver sobre Nodemailer 10 (trae sus propios tipos; no usar `@types/nodemailer`). Tests contra un `smtp-server` real en proceso.
-- `packages/ses` → `@relayo/ses`: SESv2 + eventos por SNS (firma verificada). Normalización en `src/events.ts`, fixtures en `test/fixtures/`.
-- `packages/sendgrid` → `@relayo/sendgrid`: API v3 con `fetch` (sin SDK), Event Webhook firmado (ECDSA, necesita `rawBody`). Normalización en `src/events.ts`.
-- `packages/nestjs` → `@relayo/nestjs`: `RelayoModule`, `RelayoService`, `@OnRelayoEvent`, controlador de webhooks opcional. Peer `^11 || ^12` de NestJS (la 12 es solo ESM). Usar siempre `@Inject(token)` explícito: esbuild no emite metadata de decoradores.
+- `packages/core` → `@alimzen/core`: tipos en `src/types/`, errores en `src/errors.ts`, `createRelayo` en `src/relayo.ts`, `failover()` en `src/failover.ts`, `classifyBounce` en `src/bounce.ts`, driver `memory()` para tests.
+- `packages/smtp` → `@alimzen/smtp`: driver sobre Nodemailer 10 (trae sus propios tipos; no usar `@types/nodemailer`). Tests contra un `smtp-server` real en proceso.
+- `packages/ses` → `@alimzen/ses`: SESv2 + eventos por SNS (firma verificada). Normalización en `src/events.ts`, fixtures en `test/fixtures/`.
+- `packages/sendgrid` → `@alimzen/sendgrid`: API v3 con `fetch` (sin SDK), Event Webhook firmado (ECDSA, necesita `rawBody`). Normalización en `src/events.ts`.
+- `packages/nestjs` → `@alimzen/nestjs`: `RelayoModule`, `RelayoService`, `@OnRelayoEvent`, controlador de webhooks opcional. Peer `^11 || ^12` de NestJS (la 12 es solo ESM). Usar siempre `@Inject(token)` explícito: esbuild no emite metadata de decoradores.
 - Los errores del core se reconocen entre copias del paquete por marca (`Symbol.for`) y `static code`; toda subclase nueva de `RelayoError` debe declarar `static readonly code`.
 - La clasificación de rebotes vive en el core (`classifyBounce`); los drivers no deben reinventarla, solo afinarla con datos propios del proveedor.
-- Los drivers declaran `@relayo/core` como `peerDependency` con el rango explícito `>=0.1.0 <1.0.0` (no `workspace:^`: haría que Changesets publicara los drivers como major) y como `devDependency` `workspace:^` para el enlace local. Un changeset que rompa el contrato del core debe incluir también los drivers afectados.
-- Cada paquete exporta la condición `@relayo/source` → `src/index.ts`; tsc (`customConditions`) y Vitest la usan para trabajar contra el código fuente sin compilar antes. El build de tipos de tsup la desactiva para no incrustar el core.
+- Los drivers declaran `@alimzen/core` como `peerDependency` con el rango explícito `>=0.1.0 <1.0.0` (no `workspace:^`: haría que Changesets publicara los drivers como major) y como `devDependency` `workspace:^` para el enlace local. Un changeset que rompa el contrato del core debe incluir también los drivers afectados.
+- Cada paquete exporta la condición `@alimzen/source` → `src/index.ts`; tsc (`customConditions`) y Vitest la usan para trabajar contra el código fuente sin compilar antes. El build de tipos de tsup la desactiva para no incrustar el core.
 - Comandos (desde la raíz): `pnpm build`, `pnpm test`, `pnpm typecheck`, `pnpm changeset`.
 
 ## Convenciones

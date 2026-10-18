@@ -1,10 +1,10 @@
-# @relayo/nestjs
+# @alimzen/nestjs
 
 NestJS module for [Relayo](../core): configure drivers once, inject `RelayoService` anywhere, react to
 delivery events with `@OnRelayoEvent()`, and receive provider webhooks with a ready-made controller.
 
 ```sh
-npm install @relayo/core @relayo/nestjs @relayo/sendgrid
+npm install @alimzen/core @alimzen/nestjs @alimzen/sendgrid
 ```
 
 Works with NestJS 11 and 12, on Express and Fastify. NestJS 12 is ESM-only: a CommonJS project on
@@ -19,10 +19,10 @@ const app = await NestFactory.create(AppModule, { rawBody: true });
 
 ```ts
 // app.module.ts
-import { failover } from '@relayo/core';
-import { RelayoModule } from '@relayo/nestjs';
-import { sendgrid } from '@relayo/sendgrid';
-import { ses } from '@relayo/ses';
+import { failover } from '@alimzen/core';
+import { RelayoModule } from '@alimzen/nestjs';
+import { sendgrid } from '@alimzen/sendgrid';
+import { ses } from '@alimzen/ses';
 
 @Module({
   imports: [
@@ -47,8 +47,8 @@ by default (`isGlobal: false` to opt out).
 ## Sending and handling events
 
 ```ts
-import { OnRelayoEvent, RelayoService } from '@relayo/nestjs';
-import type { BounceEvent, RelayoEvent } from '@relayo/core';
+import { OnRelayoEvent, RelayoService } from '@alimzen/nestjs';
+import type { BounceEvent, RelayoEvent } from '@alimzen/core';
 
 @Injectable()
 export class InvoiceMailer {

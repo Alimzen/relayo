@@ -1,4 +1,4 @@
-# @relayo/core
+# @alimzen/core
 
 ## 0.1.0
 

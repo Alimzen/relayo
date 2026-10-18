@@ -17,7 +17,7 @@ import {
   WebhookVerificationError,
   type BounceEvent,
   type EmailMessage,
-} from '@relayo/core';
+} from '@alimzen/core';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   formatAddress,

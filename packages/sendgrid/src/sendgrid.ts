@@ -7,7 +7,7 @@ import {
   type SendContext,
   type SendResult,
   type WebhookRequest,
-} from '@relayo/core';
+} from '@alimzen/core';
 import { errorFromResponse, networkError } from './errors.js';
 import { MESSAGE_ID_ARG, METADATA_ARG, parseSendGridEvent, type SendGridEvent } from './events.js';
 import { parsePublicKey, verifySignature } from './signature.js';

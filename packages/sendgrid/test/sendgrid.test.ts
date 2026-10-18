@@ -8,7 +8,7 @@ import {
   ValidationError,
   type BounceEvent,
   type EmailMessage,
-} from '@relayo/core';
+} from '@alimzen/core';
 import { describe, expect, it, vi } from 'vitest';
 import { sendgrid, SIGNATURE_HEADER, TIMESTAMP_HEADER, toSendGridRequest } from '../src/index.js';
 import fixtures from './fixtures/events.json';

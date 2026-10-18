@@ -1,4 +1,4 @@
-import type { Driver, EmailMessage, Recipient, SendContext, SendResult } from '@relayo/core';
+import type { Driver, EmailMessage, Recipient, SendContext, SendResult } from '@alimzen/core';
 import nodemailer, {
   type Address,
   type Attachment,

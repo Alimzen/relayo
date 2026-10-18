@@ -1,17 +1,17 @@
-# @relayo/smtp
+# @alimzen/smtp
 
 SMTP driver for [Relayo](../core), built on [Nodemailer](https://nodemailer.com). Works with any SMTP
 server: your own MTA, a relay, or a provider's SMTP endpoint.
 
 ```sh
-npm install @relayo/core @relayo/smtp
+npm install @alimzen/core @alimzen/smtp
 ```
 
 ## Usage
 
 ```ts
-import { createRelayo } from '@relayo/core';
-import { smtp } from '@relayo/smtp';
+import { createRelayo } from '@alimzen/core';
+import { smtp } from '@alimzen/smtp';
 
 const relayo = createRelayo({
   email: smtp({ host: 'smtp.example.com', port: 587, auth: { user: 'apikey', pass: process.env.SMTP_PASS! } }),
