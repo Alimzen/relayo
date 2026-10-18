@@ -1,0 +1,62 @@
+{
+  "name": "@relayo/nestjs",
+  "version": "0.0.0",
+  "description": "NestJS module for Relayo: RelayoModule, an injectable RelayoService, @OnRelayoEvent handlers and an optional webhook controller.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=20"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "@relayo/source": "./src/index.ts",
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "relayo",
+    "nestjs",
+    "email",
+    "sms",
+    "webhooks",
+    "bounces"
+  ],
+  "peerDependencies": {
+    "@nestjs/common": "^11.0.0 || ^12.0.0",
+    "@nestjs/core": "^11.0.0 || ^12.0.0",
+    "@relayo/core": "workspace:^",
+    "reflect-metadata": "^0.1.13 || ^0.2.0"
+  },
+  "devDependencies": {
+    "@nestjs/common": "^12",
+    "@nestjs/core": "^12",
+    "@nestjs/platform-express": "^12",
+    "@nestjs/platform-fastify": "^12",
+    "@nestjs/testing": "^12",
+    "@relayo/core": "workspace:^",
+    "@relayo/sendgrid": "workspace:^",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2"
+  }
+}

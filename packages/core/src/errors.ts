@@ -4,6 +4,13 @@ export interface RelayoErrorOptions {
   cause?: unknown;
 }
 
+/**
+ * Marks Relayo errors across copies of this package. When an app ends up with two copies of
+ * `@relayo/core` (ESM and CJS builds side by side, or two versions), `instanceof` on the class alone
+ * would fail and a driver's error would no longer be recognized as retryable, as a bad signature, etc.
+ */
+const BRAND = Symbol.for('@relayo/core:error');
+
 export abstract class RelayoError extends Error {
   abstract readonly code: string;
   /** Base for retries and failover: whether sending the same message again may succeed. */
@@ -16,29 +23,42 @@ export abstract class RelayoError extends Error {
     this.name = new.target.name;
     if (options.provider !== undefined) this.provider = options.provider;
     if (options.raw !== undefined) this.raw = options.raw;
+    Object.defineProperty(this, BRAND, { value: true });
+  }
+
+  /** Recognizes errors from other copies of this package: by brand, and by `code` for the subclasses. */
+  static override [Symbol.hasInstance](value: unknown): boolean {
+    if (Function.prototype[Symbol.hasInstance].call(this, value)) return true;
+    if (typeof value !== 'object' || value === null || !(value as Record<symbol, unknown>)[BRAND]) return false;
+    if (this === RelayoError) return true;
+    return Object.hasOwn(this, 'code') && (value as RelayoError).code === (this as unknown as { code: string }).code;
   }
 }
 
 /** The message is invalid or uses something the driver doesn't support. */
 export class ValidationError extends RelayoError {
-  readonly code = 'validation_error';
+  static readonly code = 'validation_error';
+  readonly code = ValidationError.code;
   readonly retryable = false;
 }
 
 /** Credentials are missing, invalid or lack permissions. */
 export class AuthenticationError extends RelayoError {
-  readonly code = 'authentication_error';
+  static readonly code = 'authentication_error';
+  readonly code = AuthenticationError.code;
   readonly retryable = false;
 }
 
 /** The provider refused the message (suppression list, invalid recipient, ...). */
 export class RejectedError extends RelayoError {
-  readonly code = 'rejected';
+  static readonly code = 'rejected';
+  readonly code = RejectedError.code;
   readonly retryable = false;
 }
 
 export class RateLimitError extends RelayoError {
-  readonly code = 'rate_limited';
+  static readonly code = 'rate_limited';
+  readonly code = RateLimitError.code;
   readonly retryable = true;
   /** Seconds to wait before retrying, when the provider says so. */
   readonly retryAfter?: number;
@@ -51,13 +71,15 @@ export class RateLimitError extends RelayoError {
 
 /** Network error, timeout or 5xx from the provider. */
 export class ProviderUnavailableError extends RelayoError {
-  readonly code = 'provider_unavailable';
+  static readonly code = 'provider_unavailable';
+  readonly code = ProviderUnavailableError.code;
   readonly retryable = true;
 }
 
 /** The driver could not verify the authenticity of a webhook. */
 export class WebhookVerificationError extends RelayoError {
-  readonly code = 'webhook_verification_failed';
+  static readonly code = 'webhook_verification_failed';
+  readonly code = WebhookVerificationError.code;
   readonly retryable = false;
 }
 

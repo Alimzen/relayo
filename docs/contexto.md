@@ -148,6 +148,47 @@ Función compartida por todos los drivers (y por el futuro lector de DSN y el si
 - Ids de evento = `sg_event_id`, estable para deduplicar.
 - Fixtures en `packages/sendgrid/test/fixtures/events.json`, basados en los ejemplos de la documentación de SendGrid; sustituir por capturas reales.
 
+### Módulo NestJS (`@relayo/nestjs`)
+
+```ts
+// main.ts: rawBody es necesario para verificar firmas (SendGrid, SNS)
+const app = await NestFactory.create(AppModule, { rawBody: true });
+
+// app.module.ts
+RelayoModule.forRootAsync({
+  inject: [ConfigService],
+  useFactory: (config: ConfigService) => ({
+    email: failover([ses({ region: 'eu-west-1' }), sendgrid({ apiKey: config.getOrThrow('SENDGRID_KEY') })]),
+  }),
+  webhooks: true, // POST /webhooks/relayo/:channel[/:provider]
+});
+
+// cualquier provider
+@Injectable()
+export class BillingService {
+  constructor(private readonly relayo: RelayoService) {}
+
+  @OnRelayoEvent('bounced')
+  async onBounce(event: BounceEvent) { /* event.bounceType, event.metadata.facturaId */ }
+}
+```
+
+- Compatible con NestJS 11 y 12 (peer `^11 || ^12`), Express y Fastify. Probado con 12.1.3 en los tests y con 11.2.7 instalando los paquetes empaquetados (ESM y CJS).
+- **NestJS 12 es solo ESM.** Un proyecto CJS con Nest 12 necesita Node ≥ 20.19 o ≥ 22.12 (`require()` de ESM). Con Nest 11 no hay restricción.
+- Módulo global por defecto (`isGlobal`). `RelayoService` implementa la misma interfaz que `Relayo`; el token `RELAYO_CLIENT` da la instancia directa.
+- `@OnRelayoEvent(...tipos)` (o `'*'`) en métodos de providers singleton; se registran en `onApplicationBootstrap` y se dan de baja al cerrar la app. En providers con scope de request se ignora con un aviso.
+- Controlador de webhooks **desactivado por defecto** (`webhooks: true` o `{ path }`). Respuestas: 200 `{ received }`, 401 si falla la firma, 400 si el payload o el canal no son válidos, 500 si un handler lanza (el proveedor reintentará: los handlers deben ser idempotentes usando `event.id`). Usa `/:channel/:provider` con `failover()`.
+- Cuerpo en bruto: usa `req.rawBody` (`rawBody: true`); en Express lee del stream los cuerpos que ningún parser consumió (SNS envía JSON como `text/plain`). Si una firma falla sin cuerpo en bruto, avisa una vez en el log de cómo activarlo.
+- El código del módulo usa `@Inject(token)` explícito porque esbuild (tsup, Vitest) no emite `emitDecoratorMetadata`; en las apps compiladas con `tsc`, `RelayoService` se inyecta por tipo con normalidad.
+
+### Errores entre copias del core
+
+Si una app acaba con dos copias de `@relayo/core` (build ESM y CJS a la vez, o dos versiones), `instanceof` fallaría y, por ejemplo, un error de firma se trataría como un 500. Los `RelayoError` llevan una marca global (`Symbol.for('@relayo/core:error')`) y `instanceof` reconoce por marca y `code` los errores de otra copia. Las subclases definen `static readonly code`.
+
+### Pendiente antes de publicar
+
+- Los drivers declaran `@relayo/core` como peer con `workspace:^`, que al publicar se convierte en `^0.x.y`. En 0.x el caret solo admite el mismo minor, y Changesets sube a major los paquetes dependientes cuando un peer queda fuera de rango. Hay que revisar la estrategia de versiones (por ejemplo, rangos de peer más amplios o `onlyUpdatePeerDependentsWhenOutOfRange`) antes de la primera publicación.
+
 ## API objetivo (cómo debe sentirse)
 
 ```ts

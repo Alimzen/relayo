@@ -11,6 +11,8 @@ Contexto completo, roadmap, contratos y ADRs: [docs/contexto.md](docs/contexto.m
 - `packages/smtp` → `@relayo/smtp`: driver sobre Nodemailer 10 (trae sus propios tipos; no usar `@types/nodemailer`). Tests contra un `smtp-server` real en proceso.
 - `packages/ses` → `@relayo/ses`: SESv2 + eventos por SNS (firma verificada). Normalización en `src/events.ts`, fixtures en `test/fixtures/`.
 - `packages/sendgrid` → `@relayo/sendgrid`: API v3 con `fetch` (sin SDK), Event Webhook firmado (ECDSA, necesita `rawBody`). Normalización en `src/events.ts`.
+- `packages/nestjs` → `@relayo/nestjs`: `RelayoModule`, `RelayoService`, `@OnRelayoEvent`, controlador de webhooks opcional. Peer `^11 || ^12` de NestJS (la 12 es solo ESM). Usar siempre `@Inject(token)` explícito: esbuild no emite metadata de decoradores.
+- Los errores del core se reconocen entre copias del paquete por marca (`Symbol.for`) y `static code`; toda subclase nueva de `RelayoError` debe declarar `static readonly code`.
 - La clasificación de rebotes vive en el core (`classifyBounce`); los drivers no deben reinventarla, solo afinarla con datos propios del proveedor.
 - Los drivers declaran `@relayo/core` como `peerDependency` (una sola copia, para que `instanceof RelayoError` funcione).
 - Cada paquete exporta la condición `@relayo/source` → `src/index.ts`; tsc (`customConditions`) y Vitest la usan para trabajar contra el código fuente sin compilar antes. El build de tipos de tsup la desactiva para no incrustar el core.

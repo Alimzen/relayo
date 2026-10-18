@@ -94,7 +94,8 @@ export function memory(
     },
 
     parseWebhook(req: WebhookRequest): RelayoEvent[] {
-      const items: unknown[] = Array.isArray(req.body) ? req.body : [req.body];
+      const body = parseBody(req);
+      const items: unknown[] = Array.isArray(body) ? body : [body];
       return items.map((item) => {
         const event = item as RelayoEvent;
         return { ...event, timestamp: new Date(event.timestamp), raw: item };
@@ -103,4 +104,12 @@ export function memory(
   };
 
   return driver;
+}
+
+/** Accepts an already-parsed body or the raw JSON text/bytes, like real provider drivers do. */
+function parseBody(req: WebhookRequest): unknown {
+  const source = typeof req.body === 'object' && req.body !== null && !(req.body instanceof Uint8Array) ? req.body : (req.rawBody ?? req.body);
+  if (typeof source === 'string') return JSON.parse(source);
+  if (source instanceof Uint8Array) return JSON.parse(Buffer.from(source).toString('utf8'));
+  return source;
 }
