@@ -45,6 +45,7 @@ relayo.on('bounced', (event) => {
 | [`@alimzen/resend`](packages/resend) | Resend API, Svix-signed webhooks, idempotency keys |
 | [`@alimzen/postmark`](packages/postmark) | Postmark API, webhooks with basic auth |
 | [`@alimzen/mailgun`](packages/mailgun) | Mailgun API (US and EU), signed webhooks |
+| [`@alimzen/simulator`](packages/simulator) | Relayo Sim driver: realistic bounces, greylisting, complaints and more, for tests and CI |
 | [`@alimzen/bounces`](packages/bounces) | Bounce reports (DSN) and spam complaints (ARF) received by email, for your own mail server |
 | [`@alimzen/imap`](packages/imap) | Reads the bounce mailbox over IMAP and emits those events |
 | [`@alimzen/nestjs`](packages/nestjs) | `RelayoModule`, injectable `RelayoService`, `@OnRelayoEvent()`, webhook controller |

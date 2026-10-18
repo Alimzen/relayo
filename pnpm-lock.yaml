@@ -112,6 +112,12 @@ importers:
         specifier: workspace:^
         version: link:../core
 
+  packages/simulator:
+    devDependencies:
+      '@alimzen/core':
+        specifier: workspace:^
+        version: link:../core
+
   packages/smtp:
     dependencies:
       nodemailer:

@@ -42,7 +42,7 @@ Pendiente: dominio (`relayo.dev` / `relayo.io`) y revisar registro de marca.
 
 Hito de validación del negocio: al final de la fase 3, los usuarios beta integran el simulador en su CI y lo siguen usando.
 
-**Estado actual: fase 0.**
+**Estado actual:** fases 0 y 1 completas (librería publicada en npm como `@alimzen/*`). Fase 2 (Relayo Sim) en curso en el repo privado `relayo-sim`: motor, SMTP, API, webhooks y driver `@alimzen/simulator` hechos; faltan probar PostgreSQL/BullMQ, DSN y el panel.
 
 ## Stack
 
