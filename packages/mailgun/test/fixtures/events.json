@@ -1,0 +1,121 @@
+{
+  "_source": "event-data based on the samples at documentation.mailgun.com/docs/mailgun/user-manual/webhooks/webhook-payloads (October 2026), with Relayo's user-variables added. Replace with captured payloads when available.",
+  "failedPermanent": {
+    "event": "failed",
+    "id": "2kFItcrLQuKTdp-Ia2Xr7w",
+    "timestamp": 1792231205.5923693,
+    "log-level": "error",
+    "severity": "permanent",
+    "reason": "bounce",
+    "recipient": "noexiste@example.com",
+    "tags": ["facturas"],
+    "user-variables": { "relayo_message_id": "7b1f3c9e-6a4d-4c1e-9d2b-1f0e8a7c6b5d", "relayo_metadata": "{\"facturaId\":\"123\"}" },
+    "delivery-status": {
+      "attempt-no": 1,
+      "code": 550,
+      "message": "5.1.1 The email account that you tried to reach does not exist.",
+      "description": null,
+      "session-seconds": 0.208,
+      "enhanced-code": "5.1.1",
+      "mx-host": "gmail-smtp-in.l.google.com",
+      "bounce-type": "hard"
+    },
+    "message": { "headers": { "message-id": "20261017100001.58bbb7ce85a423e5@mg.empresa.com" } },
+    "envelope": { "sender": "facturas@mg.empresa.com", "targets": "noexiste@example.com", "transport": "smtp" }
+  },
+  "failedHotmail": {
+    "event": "failed",
+    "id": "hotmail-1",
+    "timestamp": 1792231206.1,
+    "severity": "permanent",
+    "reason": "bounce",
+    "recipient": "badrecipient@hotmail.example",
+    "user-variables": [],
+    "delivery-status": {
+      "code": 550,
+      "message": "5.5.0 Requested action not taken: mailbox unavailable (S2017062302).",
+      "description": null,
+      "enhanced-code": "5.5.0",
+      "bounce-type": "hard"
+    },
+    "message": { "headers": { "message-id": "20261017100002.aaaa@mg.empresa.com" } }
+  },
+  "failedTemporary": {
+    "event": "failed",
+    "id": "YusK9KhoTwe2C00iRxsEqQ",
+    "timestamp": 1792231267.4288595,
+    "log-level": "warn",
+    "severity": "temporary",
+    "reason": "generic",
+    "recipient": "lento@example.com",
+    "user-variables": { "relayo_message_id": "7b1f3c9e-6a4d-4c1e-9d2b-1f0e8a7c6b5d" },
+    "delivery-status": {
+      "attempt-no": 1,
+      "code": 421,
+      "message": "Your IP (161.38.194.10) is temporary blacklisted by an anti-troyan rule",
+      "description": null,
+      "retry-seconds": 600,
+      "enhanced-code": null
+    },
+    "message": { "headers": { "message-id": "20261017100106.5c8f35804ae3fd54@mg.empresa.com" } }
+  },
+  "failedBlocklisted": {
+    "event": "failed",
+    "id": "blk-1",
+    "timestamp": 1792231300,
+    "severity": "permanent",
+    "reason": "bounce",
+    "recipient": "cliente@example.org",
+    "user-variables": {},
+    "delivery-status": { "code": 554, "message": "5.7.1 Service unavailable; Client host blocked using zen.spamhaus.org", "enhanced-code": "5.7.1" },
+    "message": { "headers": { "message-id": "m-blk@mg.empresa.com" } }
+  },
+  "suppressed": {
+    "event": "failed",
+    "id": "sup-1",
+    "timestamp": 1792231310,
+    "severity": "permanent",
+    "reason": "suppress-bounce",
+    "recipient": "suprimido@example.com",
+    "user-variables": {},
+    "delivery-status": { "code": 605, "message": "", "description": "Not delivering to previously bounced address" },
+    "message": { "headers": { "message-id": "m-sup@mg.empresa.com" } }
+  },
+  "delivered": {
+    "event": "delivered",
+    "id": "MXcc2gEpS-eN8HfkOnmK2w",
+    "timestamp": 1792231203.6585283,
+    "log-level": "info",
+    "recipient": "cliente@example.com",
+    "user-variables": { "relayo_message_id": "7b1f3c9e-6a4d-4c1e-9d2b-1f0e8a7c6b5d" },
+    "delivery-status": { "attempt-no": 1, "code": 250, "message": "OK", "description": null },
+    "message": { "headers": { "message-id": "20261017100001.58bbb7ce85a423e5@mg.empresa.com" } }
+  },
+  "complained": {
+    "event": "complained",
+    "id": "rIVDlyk8SY-mJauQoYmNFA",
+    "timestamp": 1792234772.2684145,
+    "log-level": "warn",
+    "recipient": "cliente@example.com",
+    "user-variables": { "relayo_message_id": "7b1f3c9e-6a4d-4c1e-9d2b-1f0e8a7c6b5d" },
+    "message": { "headers": { "message-id": "20261017100001.58bbb7ce85a423e5@mg.empresa.com" } }
+  },
+  "clicked": {
+    "event": "clicked",
+    "id": "A9dLUrCXQjK92TlnW3zkIA",
+    "timestamp": 1792238400.6648676,
+    "recipient": "cliente@example.com",
+    "user-variables": { "relayo_message_id": "7b1f3c9e-6a4d-4c1e-9d2b-1f0e8a7c6b5d" },
+    "message": { "headers": { "message-id": "20261017100001.58bbb7ce85a423e5@mg.empresa.com" } },
+    "url": "https://empresa.com/factura/123"
+  },
+  "unsubscribed": {
+    "event": "unsubscribed",
+    "id": "89QcW8YuSv6lhSeN3n4qnA",
+    "timestamp": 1792240000.4656289,
+    "recipient": "cliente@example.com",
+    "tags": ["*"],
+    "user-variables": [],
+    "message": { "headers": { "message-id": "20261017100001.58bbb7ce85a423e5@mg.empresa.com" } }
+  }
+}

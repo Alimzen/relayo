@@ -48,6 +48,12 @@ importers:
         specifier: ^3.3.1
         version: 3.3.1
 
+  packages/mailgun:
+    devDependencies:
+      '@alimzen/core':
+        specifier: workspace:^
+        version: link:../core
+
   packages/nestjs:
     devDependencies:
       '@alimzen/core':
@@ -77,6 +83,18 @@ importers:
       rxjs:
         specifier: ^7.8.2
         version: 7.8.2
+
+  packages/postmark:
+    devDependencies:
+      '@alimzen/core':
+        specifier: workspace:^
+        version: link:../core
+
+  packages/resend:
+    devDependencies:
+      '@alimzen/core':
+        specifier: workspace:^
+        version: link:../core
 
   packages/sendgrid:
     devDependencies:

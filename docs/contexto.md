@@ -183,6 +183,19 @@ export class BillingService {
 - Cuerpo en bruto: usa `req.rawBody` (`rawBody: true`); en Express lee del stream los cuerpos que ningún parser consumió (SNS envía JSON como `text/plain`). Si una firma falla sin cuerpo en bruto, avisa una vez en el log de cómo activarlo.
 - El código del módulo usa `@Inject(token)` explícito porque esbuild (tsup, Vitest) no emite `emitDecoratorMetadata`; en las apps compiladas con `tsc`, `RelayoService` se inyecta por tipo con normalidad.
 
+### Drivers Resend, Postmark y Mailgun
+
+Mismo patrón que SendGrid: `fetch` sin SDK ni dependencias, errores con `retryable`, webhooks verificados y normalizados con `classifyBounce` afinado con los datos de cada proveedor. Formatos de envío, errores, eventos y firmas comprobados en la documentación oficial de cada uno (octubre 2026); los fixtures se construyeron a partir de esos campos y conviene sustituirlos por capturas reales.
+
+| | Resend | Postmark | Mailgun |
+| --- | --- | --- | --- |
+| Envío | `POST /emails` JSON | `POST /email` JSON | `POST /v3/{dominio}/messages` form-data, US/EU |
+| Id y `metadata` | tags (`metadata` en base64url, ≤256 caracteres) | `Metadata` nativo | `v:` user-variables |
+| Firma de webhooks | Svix (HMAC-SHA256 de `id.timestamp.cuerpo`) | **ninguna**: autenticación básica en la URL | HMAC-SHA256 de `timestamp+token`, dentro del JSON |
+| Tags | sin límite práctico | **uno** por mensaje | **tres** por mensaje |
+| `idempotencyKey` | sí (`Idempotency-Key`, 24 h) | no | no |
+| Particularidades | 429 de cuota diaria → `retryAfter` hasta medianoche UTC; rebotes con los subtipos de SES | ErrorCode 406 (destinatario inactivo) → `RejectedError`; tipos propios de bounce (`Blocked`, `DMARCPolicy` → `block`) | `failed` temporal → `deferred`; `suppress-*` → `rejected`; `old` nunca `hard` |
+
 ### Rebotes por correo (`@alimzen/bounces`)
 
 Cierra el caso del correo propio por SMTP, que no tiene webhooks: `parseBounceEmail(raw)` convierte el correo que llega al buzón de rebotes en eventos Relayo.

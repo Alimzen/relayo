@@ -1,0 +1,116 @@
+{
+  "_source": "Built from the fields documented at resend.com/docs/webhooks/emails/* (October 2026). Replace with captured payloads when available.",
+  "sent": {
+    "type": "email.sent",
+    "created_at": "2026-10-17T10:00:01.000Z",
+    "data": {
+      "created_at": "2026-10-17T10:00:00.900Z",
+      "email_id": "56761188-7520-42d8-8898-ff6fc54ce618",
+      "message_id": "<111-222-333@email.empresa.com>",
+      "from": "Facturas <facturas@empresa.com>",
+      "to": ["cliente@example.com"],
+      "subject": "Tu factura de octubre",
+      "tags": { "relayo_message_id": "7b1f3c9e-6a4d-4c1e-9d2b-1f0e8a7c6b5d", "relayo_metadata": "eyJmYWN0dXJhSWQiOiIxMjMifQ" }
+    }
+  },
+  "delivered": {
+    "type": "email.delivered",
+    "created_at": "2026-10-17T10:00:03.000Z",
+    "data": {
+      "email_id": "56761188-7520-42d8-8898-ff6fc54ce618",
+      "to": ["cliente@example.com"],
+      "tags": { "relayo_message_id": "7b1f3c9e-6a4d-4c1e-9d2b-1f0e8a7c6b5d" }
+    }
+  },
+  "bouncedHard": {
+    "type": "email.bounced",
+    "created_at": "2026-10-17T10:00:04.000Z",
+    "data": {
+      "email_id": "56761188-7520-42d8-8898-ff6fc54ce618",
+      "to": ["noexiste@example.com"],
+      "subject": "Tu factura de octubre",
+      "tags": { "relayo_message_id": "7b1f3c9e-6a4d-4c1e-9d2b-1f0e8a7c6b5d", "relayo_metadata": "eyJmYWN0dXJhSWQiOiIxMjMifQ" },
+      "bounce": {
+        "type": "Permanent",
+        "subType": "General",
+        "message": "The recipient's email provider sent a hard bounce message.",
+        "diagnosticCode": ["smtp; 550 5.1.1 The email account that you tried to reach does not exist"]
+      }
+    }
+  },
+  "bouncedBlocklisted": {
+    "type": "email.bounced",
+    "created_at": "2026-10-17T10:00:04.000Z",
+    "data": {
+      "email_id": "e2",
+      "to": ["cliente@example.org"],
+      "tags": {},
+      "bounce": {
+        "type": "Permanent",
+        "subType": "General",
+        "message": "Hard bounce",
+        "diagnosticCode": ["smtp; 554 5.7.1 Service unavailable; Client host blocked using zen.spamhaus.org"]
+      }
+    }
+  },
+  "bouncedSuppressed": {
+    "type": "email.bounced",
+    "created_at": "2026-10-17T10:00:04.000Z",
+    "data": {
+      "email_id": "e3",
+      "to": ["suprimido@example.com"],
+      "tags": { "category": "confirm_email" },
+      "bounce": {
+        "type": "Permanent",
+        "subType": "Suppressed",
+        "message": "The recipient's email address is on the suppression list because it has a recent history of producing hard bounces."
+      }
+    }
+  },
+  "bouncedMailboxFull": {
+    "type": "email.bounced",
+    "created_at": "2026-10-17T10:00:04.000Z",
+    "data": {
+      "email_id": "e4",
+      "to": ["lleno@example.com"],
+      "bounce": { "type": "Temporary", "subType": "MailboxFull", "message": "Mailbox full" }
+    }
+  },
+  "suppressed": {
+    "type": "email.suppressed",
+    "created_at": "2026-10-17T10:00:01.000Z",
+    "data": {
+      "email_id": "e5",
+      "to": ["suprimido@example.com"],
+      "suppressed": {
+        "type": "OnAccountSuppressionList",
+        "message": "Resend has suppressed sending to this address because it is on the account-level suppression list."
+      }
+    }
+  },
+  "clicked": {
+    "type": "email.clicked",
+    "created_at": "2026-10-17T12:00:01.000Z",
+    "data": {
+      "email_id": "56761188-7520-42d8-8898-ff6fc54ce618",
+      "to": ["cliente@example.com"],
+      "tags": { "relayo_message_id": "7b1f3c9e-6a4d-4c1e-9d2b-1f0e8a7c6b5d" },
+      "click": { "ipAddress": "192.0.2.1", "link": "https://empresa.com/factura/123", "timestamp": "2026-10-17T12:00:00.000Z", "userAgent": "Mozilla/5.0" }
+    }
+  },
+  "failed": {
+    "type": "email.failed",
+    "created_at": "2026-10-17T10:00:01.000Z",
+    "data": { "email_id": "e6", "to": ["cliente@example.com"], "failed": { "reason": "reached_daily_quota" } }
+  },
+  "complained": {
+    "type": "email.complained",
+    "created_at": "2026-10-17T13:00:00.000Z",
+    "data": { "email_id": "e7", "to": ["cliente@example.com"] }
+  },
+  "domainCreated": {
+    "type": "domain.created",
+    "created_at": "2026-10-17T13:00:00.000Z",
+    "data": { "id": "d1", "name": "empresa.com" }
+  }
+}

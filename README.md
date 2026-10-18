@@ -42,11 +42,14 @@ relayo.on('bounced', (event) => {
 | [`@alimzen/smtp`](packages/smtp) | Any SMTP server, built on Nodemailer |
 | [`@alimzen/ses`](packages/ses) | Amazon SES (v2 API), events through SNS with signature verification |
 | [`@alimzen/sendgrid`](packages/sendgrid) | SendGrid v3 API, signed Event Webhook |
+| [`@alimzen/resend`](packages/resend) | Resend API, Svix-signed webhooks, idempotency keys |
+| [`@alimzen/postmark`](packages/postmark) | Postmark API, webhooks with basic auth |
+| [`@alimzen/mailgun`](packages/mailgun) | Mailgun API (US and EU), signed webhooks |
 | [`@alimzen/bounces`](packages/bounces) | Bounce reports (DSN) and spam complaints (ARF) received by email, for your own mail server |
 | [`@alimzen/imap`](packages/imap) | Reads the bounce mailbox over IMAP and emits those events |
 | [`@alimzen/nestjs`](packages/nestjs) | `RelayoModule`, injectable `RelayoService`, `@OnRelayoEvent()`, webhook controller |
 
-SMS (Twilio) and more email providers (Mailgun, Postmark, Resend) are on the roadmap.
+SMS (Twilio) is on the roadmap.
 
 ## Ideas worth knowing
 
