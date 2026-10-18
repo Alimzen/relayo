@@ -1,0 +1,52 @@
+{
+  "name": "relayo",
+  "version": "0.0.0",
+  "description": "Command line for Relayo Sim: send test emails, inspect their timelines and wait for bounces, complaints or deliveries in CI.",
+  "license": "MIT",
+  "author": "Alimzen",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Alimzen/relayo.git",
+    "directory": "packages/cli"
+  },
+  "homepage": "https://github.com/Alimzen/relayo/tree/main/packages/cli#readme",
+  "bugs": {
+    "url": "https://github.com/Alimzen/relayo/issues"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "bin": {
+    "relayo": "./dist/cli.js"
+  },
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "relayo",
+    "cli",
+    "email",
+    "testing",
+    "ci",
+    "bounces",
+    "simulator"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}

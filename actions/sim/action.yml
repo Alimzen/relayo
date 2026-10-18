@@ -1,0 +1,68 @@
+name: Relayo Sim
+description: Point your tests at Relayo Sim, the email delivery simulator, and summarize what happened to every email sent in the job.
+author: Alimzen
+branding:
+  icon: mail
+  color: gray-dark
+
+inputs:
+  step:
+    description: '"start" before your tests (exports RELAYO_SIM_URL, RELAYO_SIM_API_KEY and RELAYO_SIM_SINCE), "report" after them (job summary).'
+    required: false
+    default: start
+  url:
+    description: Base URL of Relayo Sim. Needed for "start".
+    required: false
+  api-key:
+    description: API key of the Relayo Sim project. Needed for "start"; keep it in a secret.
+    required: false
+  cli-version:
+    description: Version of the relayo CLI (npm) to run.
+    required: false
+    default: '0'
+
+runs:
+  using: composite
+  steps:
+    - name: Start
+      if: inputs.step == 'start'
+      shell: bash
+      # Inputs go through the environment, never into the script text, so they cannot inject commands.
+      env:
+        SIM_URL: ${{ inputs.url }}
+        SIM_KEY: ${{ inputs.api-key }}
+        CLI: relayo@${{ inputs.cli-version }}
+      run: |
+        if [ -z "$SIM_URL" ] || [ -z "$SIM_KEY" ]; then
+          echo "::error title=Relayo Sim::The start step needs the url and api-key inputs."
+          exit 2
+        fi
+        echo "::add-mask::$SIM_KEY"
+        {
+          echo "RELAYO_SIM_URL=$SIM_URL"
+          echo "RELAYO_SIM_API_KEY=$SIM_KEY"
+          echo "RELAYO_SIM_SINCE=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+        } >> "$GITHUB_ENV"
+        # Fail early, with a clear message, if the simulator is unreachable or the key is wrong.
+        RELAYO_SIM_URL="$SIM_URL" RELAYO_SIM_API_KEY="$SIM_KEY" npx --yes "$CLI" messages --limit 1 > /dev/null
+        echo "Relayo Sim ready at $SIM_URL"
+
+    - name: Report
+      if: inputs.step == 'report'
+      shell: bash
+      env:
+        CLI: relayo@${{ inputs.cli-version }}
+      run: |
+        if [ -z "$RELAYO_SIM_SINCE" ]; then
+          echo "::warning title=Relayo Sim::Run this action with step: start before the tests to get a report."
+          exit 0
+        fi
+        npx --yes "$CLI" report --since "$RELAYO_SIM_SINCE" --format markdown >> "$GITHUB_STEP_SUMMARY"
+        npx --yes "$CLI" report --since "$RELAYO_SIM_SINCE"
+
+    - name: Check the step
+      if: inputs.step != 'start' && inputs.step != 'report'
+      shell: bash
+      run: |
+        echo "::error title=Relayo Sim::step must be start or report."
+        exit 2

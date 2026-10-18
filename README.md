@@ -49,6 +49,10 @@ relayo.on('bounced', (event) => {
 | [`@alimzen/bounces`](packages/bounces) | Bounce reports (DSN) and spam complaints (ARF) received by email, for your own mail server |
 | [`@alimzen/imap`](packages/imap) | Reads the bounce mailbox over IMAP and emits those events |
 | [`@alimzen/nestjs`](packages/nestjs) | `RelayoModule`, injectable `RelayoService`, `@OnRelayoEvent()`, webhook controller |
+| [`relayo`](packages/cli) | CLI for Relayo Sim: send, inspect, and wait for bounces or deliveries in CI |
+
+In CI on GitHub, the [Relayo Sim action](actions/sim) points your tests at the simulator and summarizes every email
+the job sent.
 
 SMS (Twilio) is on the roadmap.
 
