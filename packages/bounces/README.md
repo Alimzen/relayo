@@ -43,6 +43,8 @@ Most reports quote the original message's headers. `@alimzen/smtp` sends `X-Rela
 and `metadata`. If a report only quotes the `Message-ID`, the id is recovered from it. Some feedback loops
 redact the recipient: those complaints have `recipient: ''`, but still the `messageId`.
 
+To read the mailbox automatically, use [`@alimzen/imap`](../imap).
+
 ## Where bounces go
 
 Receiving servers send reports to the envelope sender (the `Return-Path`), which is your `from` address

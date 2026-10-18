@@ -43,6 +43,7 @@ relayo.on('bounced', (event) => {
 | [`@alimzen/ses`](packages/ses) | Amazon SES (v2 API), events through SNS with signature verification |
 | [`@alimzen/sendgrid`](packages/sendgrid) | SendGrid v3 API, signed Event Webhook |
 | [`@alimzen/bounces`](packages/bounces) | Bounce reports (DSN) and spam complaints (ARF) received by email, for your own mail server |
+| [`@alimzen/imap`](packages/imap) | Reads the bounce mailbox over IMAP and emits those events |
 | [`@alimzen/nestjs`](packages/nestjs) | `RelayoModule`, injectable `RelayoService`, `@OnRelayoEvent()`, webhook controller |
 
 SMS (Twilio) and more email providers (Mailgun, Postmark, Resend) are on the roadmap.

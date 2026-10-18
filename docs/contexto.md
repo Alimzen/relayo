@@ -193,7 +193,7 @@ Cierra el caso del correo propio por SMTP, que no tiene webhooks: `parseBounceEm
 - Enlace con el envío: cabeceras citadas del original (`X-Relayo-Message-ID`, `X-Relayo-Metadata`) o, en su defecto, el `Message-ID` `<id@dominio>` que pone el driver SMTP.
 - Ids de evento derivados del informe: procesar el mismo buzón dos veces da los mismos ids.
 - Parser MIME propio, mínimo y sin dependencias (multipart, base64, quoted-printable, `message/rfc822`, `text/rfc822-headers`). Fixtures `.eml` escritos a mano según los formatos de Postfix, Gmail, Microsoft 365, Exim y ARF: sustituir por capturas reales cuando las haya.
-- Pendiente: leer el buzón por IMAP (paquete aparte, encima de esta función).
+- Lectura automática del buzón: `@alimzen/imap` (`bounceMailbox({ connection }).watch(e => relayo.emit(e))`), sobre ImapFlow 2. Cada pasada abre y cierra su conexión, lee los no leídos y marca, mueve o borra cada mensaje solo después de que el handler haya procesado sus eventos; si falla, el mensaje queda sin leer y se reintenta (entrega al menos una vez, ids estables para deduplicar). Probado contra `hoodiecrow-imap`, un servidor IMAP en memoria. Sin IDLE: sondeo por intervalo, suficiente para rebotes.
 
 El driver SMTP añade para esto `X-Relayo-Metadata` (desactivable con `metadataHeader: false`) y la opción `bounceAddress` (remitente del sobre). Nodemailer sustituye el sobre completo, así que el driver vuelve a listar los destinatarios: probado contra un servidor SMTP real, sin filtrar el Bcc.
 

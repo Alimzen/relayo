@@ -61,4 +61,5 @@ The SMTP details (`responseCode`, `enhancedCode`, `response`, `rejected`) are in
 
 SMTP has none. Problems the server reports during the session surface as errors or `rejectedRecipients`;
 bounces that happen later arrive as emails to the envelope sender (`bounceAddress`, or your `from`).
-[`@alimzen/bounces`](../bounces) turns them, and spam complaints from feedback loops, into Relayo events.
+[`@alimzen/bounces`](../bounces) turns them, and spam complaints from feedback loops, into Relayo events, and
+[`@alimzen/imap`](../imap) reads the mailbox for you.
