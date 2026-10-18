@@ -3,6 +3,16 @@
   "version": "0.0.0",
   "description": "NestJS module for Relayo: RelayoModule, an injectable RelayoService, @OnRelayoEvent handlers and an optional webhook controller.",
   "license": "MIT",
+  "author": "Alimzen",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Alimzen/relayo.git",
+    "directory": "packages/nestjs"
+  },
+  "homepage": "https://github.com/Alimzen/relayo/tree/main/packages/nestjs#readme",
+  "bugs": {
+    "url": "https://github.com/Alimzen/relayo/issues"
+  },
   "type": "module",
   "sideEffects": false,
   "engines": {
@@ -45,7 +55,7 @@
   "peerDependencies": {
     "@nestjs/common": "^11.0.0 || ^12.0.0",
     "@nestjs/core": "^11.0.0 || ^12.0.0",
-    "@relayo/core": "workspace:^",
+    "@relayo/core": ">=0.1.0 <1.0.0",
     "reflect-metadata": "^0.1.13 || ^0.2.0"
   },
   "devDependencies": {
@@ -58,5 +68,21 @@
     "@relayo/sendgrid": "workspace:^",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2"
+  },
+  "publishConfig": {
+    "access": "public",
+    "exports": {
+      ".": {
+        "import": {
+          "types": "./dist/index.d.ts",
+          "default": "./dist/index.js"
+        },
+        "require": {
+          "types": "./dist/index.d.cts",
+          "default": "./dist/index.cjs"
+        }
+      },
+      "./package.json": "./package.json"
+    }
   }
 }

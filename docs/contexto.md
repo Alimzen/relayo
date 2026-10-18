@@ -185,9 +185,32 @@ export class BillingService {
 
 Si una app acaba con dos copias de `@relayo/core` (build ESM y CJS a la vez, o dos versiones), `instanceof` fallaría y, por ejemplo, un error de firma se trataría como un 500. Los `RelayoError` llevan una marca global (`Symbol.for('@relayo/core:error')`) y `instanceof` reconoce por marca y `code` los errores de otra copia. Las subclases definen `static readonly code`.
 
-### Pendiente antes de publicar
+### Versiones y publicación
 
-- Los drivers declaran `@relayo/core` como peer con `workspace:^`, que al publicar se convierte en `^0.x.y`. En 0.x el caret solo admite el mismo minor, y Changesets sube a major los paquetes dependientes cuando un peer queda fuera de rango. Hay que revisar la estrategia de versiones (por ejemplo, rangos de peer más amplios o `onlyUpdatePeerDependentsWhenOutOfRange`) antes de la primera publicación.
+- Con el peer `workspace:^`, Changesets publicaba los drivers como **1.0.0** ya en la primera versión (el core quedaba en 0.1.0) y volvía a subirlos de major con cada minor del core. Comprobado con `changeset version` en una copia del repo.
+- Solución adoptada: los drivers declaran el peer `@relayo/core: ">=0.1.0 <1.0.0"` (rango explícito; el enlace local sigue viniendo de la `devDependency` `workspace:^`) y Changesets usa `onlyUpdatePeerDependentsWhenOutOfRange`. Resultado comprobado: primera versión 0.1.0 en los cinco paquetes, y después cada paquete sube por su cuenta.
+- Contrapartida: durante 0.x el rango acepta cualquier core 0.x, así que npm no avisará si un core con cambios incompatibles se combina con un driver antiguo. Regla: un changeset que rompa el contrato del core debe incluir también los drivers afectados. Al llegar a 1.0, cambiar el peer a `^1.0.0`.
+- `publishConfig.exports` quita la condición `@relayo/source` (apunta a `src/`, que no se publica) de los paquetes publicados.
+- La provenance de npm solo puede generarse desde CI; no va en `publishConfig` para que la publicación manual funcione.
+
+### Cómo publicar
+
+**Primera vez (manual, antes de subir los workflows a GitHub):** requiere la org `relayo` en npm y una cuenta con 2FA.
+
+```sh
+npm login
+pnpm install && pnpm test && pnpm build
+pnpm changeset version        # 0.1.0 + CHANGELOG.md por paquete; consume los changesets
+git add -A && git commit -m "Release 0.1.0"
+pnpm release                  # build + changeset publish (pide el código 2FA) y crea las etiquetas
+git push --follow-tags
+```
+
+Al subir, el workflow `Release` no encuentra changesets pendientes y las versiones ya están en npm, así que no hace nada.
+
+**Después (automático):** configurar en npmjs.com, para cada paquete, Settings → Trusted Publisher → GitHub Actions (`Alimzen/relayo`, workflow `release.yml`). A partir de ahí, cada cambio publicable lleva su `pnpm changeset`. Al llegar a `main`, el workflow abre o actualiza un PR "Version packages", y al mergearlo publica en npm con provenance. Si se prefiere un token en lugar de trusted publishing, guardarlo como secreto `NPM_TOKEN` del repo.
+
+**CI:** `ci.yml` ejecuta typecheck, build y tests en Node 20, 22 y 24 en cada push a `main` y en cada PR.
 
 ## API objetivo (cómo debe sentirse)
 

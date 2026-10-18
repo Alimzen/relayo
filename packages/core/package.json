@@ -3,6 +3,16 @@
   "version": "0.0.0",
   "description": "Provider-agnostic messaging for Node: one API to send email and SMS, and normalized delivery events.",
   "license": "MIT",
+  "author": "Alimzen",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Alimzen/relayo.git",
+    "directory": "packages/core"
+  },
+  "homepage": "https://github.com/Alimzen/relayo/tree/main/packages/core#readme",
+  "bugs": {
+    "url": "https://github.com/Alimzen/relayo/issues"
+  },
   "type": "module",
   "sideEffects": false,
   "engines": {
@@ -25,12 +35,40 @@
     },
     "./package.json": "./package.json"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsup",
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit"
   },
-  "keywords": ["email", "sms", "messaging", "bounces", "webhooks", "ses", "sendgrid", "smtp", "twilio"]
+  "keywords": [
+    "email",
+    "sms",
+    "messaging",
+    "bounces",
+    "webhooks",
+    "ses",
+    "sendgrid",
+    "smtp",
+    "twilio"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "exports": {
+      ".": {
+        "import": {
+          "types": "./dist/index.d.ts",
+          "default": "./dist/index.js"
+        },
+        "require": {
+          "types": "./dist/index.d.cts",
+          "default": "./dist/index.cjs"
+        }
+      },
+      "./package.json": "./package.json"
+    }
+  }
 }

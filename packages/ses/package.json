@@ -3,6 +3,16 @@
   "version": "0.0.0",
   "description": "Amazon SES driver for Relayo: sending through SESv2 and normalized events from SNS.",
   "license": "MIT",
+  "author": "Alimzen",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Alimzen/relayo.git",
+    "directory": "packages/ses"
+  },
+  "homepage": "https://github.com/Alimzen/relayo/tree/main/packages/ses#readme",
+  "bugs": {
+    "url": "https://github.com/Alimzen/relayo/issues"
+  },
   "type": "module",
   "sideEffects": false,
   "engines": {
@@ -46,9 +56,25 @@
     "@aws-sdk/client-sesv2": "^3.1152.0"
   },
   "peerDependencies": {
-    "@relayo/core": "workspace:^"
+    "@relayo/core": ">=0.1.0 <1.0.0"
   },
   "devDependencies": {
     "@relayo/core": "workspace:^"
+  },
+  "publishConfig": {
+    "access": "public",
+    "exports": {
+      ".": {
+        "import": {
+          "types": "./dist/index.d.ts",
+          "default": "./dist/index.js"
+        },
+        "require": {
+          "types": "./dist/index.d.cts",
+          "default": "./dist/index.cjs"
+        }
+      },
+      "./package.json": "./package.json"
+    }
   }
 }
