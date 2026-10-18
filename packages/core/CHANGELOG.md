@@ -1,5 +1,12 @@
 # @alimzen/core
 
+## 0.2.1
+
+### Patch Changes
+
+- d72441d: `classifyBounce`: the Microsoft 365 rule for `X.1.10 RecipientNotFound` no longer turns other domain errors (e.g. `550 5.1.2 Host or domain name not found`) into `user_unknown`; they stay `domain_invalid`. Recognizes more "domain not found" wordings.
+- 1763b91: "Try again later" alone no longer means a rate limit: greylisting and busy servers say it too. `classifyBounce` and the SMTP driver now need explicit throttling words (rate, too many, throttling, limit exceeded); `451 4.7.1 Greylisted, please try again later` is a `ProviderUnavailableError`, not a `RateLimitError`.
+
 ## 0.2.0
 
 ### Minor Changes

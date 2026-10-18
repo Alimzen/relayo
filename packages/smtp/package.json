@@ -1,6 +1,6 @@
 {
   "name": "@alimzen/smtp",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "SMTP driver for Relayo, built on Nodemailer.",
   "license": "MIT",
   "author": "Alimzen",
