@@ -56,6 +56,31 @@ describe('simulator driver', () => {
     });
   });
 
+  it('sends attachments in base64 and the reply-to address, so the simulator captures them', async () => {
+    const fetch = fakeFetch(() => Response.json({ id: 'sim_1', status: 'queued' }, { status: 202 }));
+    const relayo = createRelayo({ email: simulator({ apiKey: 'k', baseUrl: 'http://x', fetch }) });
+
+    await relayo.email.send({
+      from: { address: 'a@empresa.com' },
+      replyTo: { address: 'soporte@empresa.com' },
+      to: { address: 'ana@sim.relayo.dev' },
+      subject: 's',
+      html: '<img src="cid:logo">',
+      attachments: [
+        { filename: 'a.txt', content: 'hola' },
+        { filename: 'logo.png', content: new Uint8Array([1, 2, 3]), contentType: 'image/png', cid: 'logo' },
+      ],
+    });
+
+    expect(JSON.parse(fetch.mock.calls[0]![1]!.body as string)).toMatchObject({
+      replyTo: { address: 'soporte@empresa.com' },
+      attachments: [
+        { filename: 'a.txt', content: Buffer.from('hola').toString('base64') },
+        { filename: 'logo.png', content: 'AQID', contentType: 'image/png', cid: 'logo' },
+      ],
+    });
+  });
+
   it.each([
     [400, ValidationError],
     [401, AuthenticationError],
