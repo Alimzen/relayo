@@ -1,6 +1,6 @@
 {
   "name": "@relayo/nestjs",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "NestJS module for Relayo: RelayoModule, an injectable RelayoService, @OnRelayoEvent handlers and an optional webhook controller.",
   "license": "MIT",
   "author": "Alimzen",
