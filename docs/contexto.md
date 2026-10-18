@@ -137,6 +137,17 @@ Función compartida por todos los drivers (y por el futuro lector de DSN y el si
 - Ids de evento `snsMessageId:índice`: estables ante reintentos de SNS, sirven para deduplicar.
 - Los fixtures (`packages/ses/test/fixtures/ses-events.json`) siguen los ejemplos de la documentación de AWS; hay que sustituirlos por payloads capturados de una cuenta real.
 
+### Driver SendGrid (`@relayo/sendgrid`)
+
+- API v3 (`POST /v3/mail/send`) con `fetch`, sin SDK ni dependencias en runtime. Región `eu` para cuentas con residencia de datos en la UE, `sandbox` para validar sin entregar, timeout configurable (30 s por defecto). Resultado `status: 'queued'` con `X-Message-Id` como `providerMessageId`.
+- El id de Relayo y `metadata` viajan como `custom_args` (`relayo_message_id`, `relayo_metadata` en JSON): SendGrid los repite en cada evento y **no** son visibles para el destinatario, a diferencia de la cabecera de SES. Los `tags` se convierten en categorías (máximo 10; si hay más, `ValidationError` antes de llamar a la API).
+- Errores HTTP: 401/403 → `AuthenticationError` (incluye remitente no verificado), 429 → `RateLimitError` con `retryAfter` sacado de `X-RateLimit-Reset`, 5xx y fallos de red → `ProviderUnavailableError`, resto de 4xx → `ValidationError`.
+- Event Webhook firmado: ECDSA P-256 sobre `timestamp + cuerpo en bruto`; **necesita `rawBody`**. La clave se acepta en base64 (tal como la muestra SendGrid) o PEM. Sin `publicKey` falla con un error explícito salvo `verifySignature: false`. Tolerancia de timestamp opcional (`toleranceSeconds`) contra replays; desactivada por defecto porque no está claro que SendGrid vuelva a firmar los reintentos.
+- Mapeo: processed→`accepted`, delivered, deferred, bounce→`bounced`, dropped→`rejected` (motivo `suppressed` / `invalid_recipient` / `unknown`), spamreport→`complained`, open, click (con `url`), unsubscribe y group_unsubscribe→`unsubscribed`. `group_resubscribe` se ignora.
+- Rebotes: `classifyBounce` afinado con `bounce_classification`. Content, Reputation y Frequency or Volume → `block` aunque el código sea 5xx; un `type: "blocked"` nunca queda como `hard`.
+- Ids de evento = `sg_event_id`, estable para deduplicar.
+- Fixtures en `packages/sendgrid/test/fixtures/events.json`, basados en los ejemplos de la documentación de SendGrid; sustituir por capturas reales.
+
 ## API objetivo (cómo debe sentirse)
 
 ```ts

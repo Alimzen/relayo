@@ -26,6 +26,12 @@ importers:
 
   packages/core: {}
 
+  packages/sendgrid:
+    devDependencies:
+      '@relayo/core':
+        specifier: workspace:^
+        version: link:../core
+
   packages/ses:
     dependencies:
       '@aws-sdk/client-sesv2':

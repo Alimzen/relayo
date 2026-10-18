@@ -1,0 +1,117 @@
+[
+  {
+    "email": "cliente@example.com",
+    "timestamp": 1792231201,
+    "smtp-id": "<14c5d75ce93.dfd.64b469@ismtpd-555>",
+    "event": "processed",
+    "category": ["facturas"],
+    "sg_event_id": "rbtnWrG1DVDGGGFHFyun0A==",
+    "sg_message_id": "14c5d75ce93.dfd.64b469.filter0001.16648.5515E0B88.000000000000000000000",
+    "relayo_message_id": "7b1f3c9e-6a4d-4c1e-9d2b-1f0e8a7c6b5d",
+    "relayo_metadata": "{\"facturaId\":\"123\"}"
+  },
+  {
+    "email": "cliente@example.com",
+    "timestamp": 1792231203,
+    "smtp-id": "<14c5d75ce93.dfd.64b469@ismtpd-555>",
+    "event": "delivered",
+    "category": ["facturas"],
+    "sg_event_id": "rWVYmVk90MjZJ9iohOBa3w==",
+    "sg_message_id": "14c5d75ce93.dfd.64b469.filter0001.16648.5515E0B88.000000000000000000000",
+    "response": "250 OK",
+    "relayo_message_id": "7b1f3c9e-6a4d-4c1e-9d2b-1f0e8a7c6b5d",
+    "relayo_metadata": "{\"facturaId\":\"123\"}"
+  },
+  {
+    "email": "lento@example.com",
+    "timestamp": 1792231205,
+    "event": "deferred",
+    "sg_event_id": "t7LEShmowp86DTdUW8M-GQ==",
+    "sg_message_id": "14c5d75ce94.dfd.64b469.filter0001.16648.5515E0B88.000000000000000000000",
+    "response": "400 try again later",
+    "attempt": "5",
+    "relayo_message_id": "msg-deferred"
+  },
+  {
+    "email": "noexiste@example.com",
+    "timestamp": 1792231207,
+    "event": "bounce",
+    "type": "bounce",
+    "bounce_classification": "Invalid Address",
+    "reason": "550 5.1.1 The email account that you tried to reach does not exist",
+    "status": "5.1.1",
+    "sg_event_id": "6g4ZI7SA-xmRDv57GoPIPw==",
+    "sg_message_id": "14c5d75ce95.dfd.64b469.filter0001.16648.5515E0B88.000000000000000000000",
+    "relayo_message_id": "msg-bounce"
+  },
+  {
+    "email": "cliente@example.com",
+    "timestamp": 1792231209,
+    "event": "bounce",
+    "type": "blocked",
+    "bounce_classification": "Reputation",
+    "reason": "550 Message rejected",
+    "status": "5.0.0",
+    "sg_event_id": "blocked-0001",
+    "sg_message_id": "14c5d75ce96.dfd.64b469.filter0001.16648.5515E0B88.000000000000000000000",
+    "relayo_message_id": "msg-blocked"
+  },
+  {
+    "email": "suprimido@example.com",
+    "timestamp": 1792231211,
+    "event": "dropped",
+    "reason": "Bounced Address",
+    "status": "5.0.0",
+    "sg_event_id": "zmzJhfJgAfUSOW80yEbPyw==",
+    "sg_message_id": "14c5d75ce97.dfd.64b469.filter0001.16648.5515E0B88.000000000000000000000",
+    "relayo_message_id": "msg-dropped"
+  },
+  {
+    "email": "cliente@example.com",
+    "timestamp": 1792231213,
+    "event": "open",
+    "sg_machine_open": false,
+    "useragent": "Mozilla/5.0",
+    "ip": "192.0.2.1",
+    "sg_event_id": "FOTFFO0ecsBE-zxFXfs6WA==",
+    "sg_message_id": "14c5d75ce93.dfd.64b469.filter0001.16648.5515E0B88.000000000000000000000",
+    "relayo_message_id": "7b1f3c9e-6a4d-4c1e-9d2b-1f0e8a7c6b5d"
+  },
+  {
+    "email": "cliente@example.com",
+    "timestamp": 1792231215,
+    "event": "click",
+    "useragent": "Mozilla/5.0",
+    "ip": "192.0.2.1",
+    "url": "https://empresa.com/factura/123",
+    "url_offset": { "index": 0, "type": "html" },
+    "sg_event_id": "kCAi1KttyQdEKHhdC-nuEA==",
+    "sg_message_id": "14c5d75ce93.dfd.64b469.filter0001.16648.5515E0B88.000000000000000000000",
+    "relayo_message_id": "7b1f3c9e-6a4d-4c1e-9d2b-1f0e8a7c6b5d"
+  },
+  {
+    "email": "cliente@example.com",
+    "timestamp": 1792231217,
+    "event": "spamreport",
+    "sg_event_id": "37nvH5QBz858KGVYCM4uOA==",
+    "sg_message_id": "14c5d75ce93.dfd.64b469.filter0001.16648.5515E0B88.000000000000000000000",
+    "relayo_message_id": "7b1f3c9e-6a4d-4c1e-9d2b-1f0e8a7c6b5d"
+  },
+  {
+    "email": "cliente@example.com",
+    "timestamp": 1792231219,
+    "event": "group_unsubscribe",
+    "asm_group_id": 10,
+    "sg_event_id": "ahSCB7xYcXFb-hEaawsPRw==",
+    "sg_message_id": "14c5d75ce93.dfd.64b469.filter0001.16648.5515E0B88.000000000000000000000",
+    "relayo_message_id": "7b1f3c9e-6a4d-4c1e-9d2b-1f0e8a7c6b5d"
+  },
+  {
+    "email": "cliente@example.com",
+    "timestamp": 1792231221,
+    "event": "group_resubscribe",
+    "asm_group_id": 10,
+    "sg_event_id": "resub-0001",
+    "sg_message_id": "14c5d75ce93.dfd.64b469.filter0001.16648.5515E0B88.000000000000000000000"
+  }
+]
