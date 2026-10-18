@@ -183,6 +183,28 @@ export class BillingService {
 - Cuerpo en bruto: usa `req.rawBody` (`rawBody: true`); en Express lee del stream los cuerpos que ningún parser consumió (SNS envía JSON como `text/plain`). Si una firma falla sin cuerpo en bruto, avisa una vez en el log de cómo activarlo.
 - El código del módulo usa `@Inject(token)` explícito porque esbuild (tsup, Vitest) no emite `emitDecoratorMetadata`; en las apps compiladas con `tsc`, `RelayoService` se inyecta por tipo con normalidad.
 
+### Rebotes por correo (`@alimzen/bounces`)
+
+Cierra el caso del correo propio por SMTP, que no tiene webhooks: `parseBounceEmail(raw)` convierte el correo que llega al buzón de rebotes en eventos Relayo.
+
+- DSN (RFC 3464): `failed` → `bounced` (con `classifyBounce`), `delayed` → `deferred`, `delivered`/`relayed`/`expanded` → `delivered`. Un evento por destinatario.
+- ARF (RFC 5965): `abuse`, `fraud`, `virus`, `other` → `complained`; `not-spam` y `auth-failure` se ignoran. Si el feedback loop oculta el destinatario, `recipient` es `''` pero el `messageId` sigue identificando el envío.
+- Rebotes no estándar con `X-Failed-Recipients` (Exim, Gmail…) → `bounced`. Respuestas automáticas (fuera de oficina) → `kind: 'auto-reply'`, sin eventos.
+- Enlace con el envío: cabeceras citadas del original (`X-Relayo-Message-ID`, `X-Relayo-Metadata`) o, en su defecto, el `Message-ID` `<id@dominio>` que pone el driver SMTP.
+- Ids de evento derivados del informe: procesar el mismo buzón dos veces da los mismos ids.
+- Parser MIME propio, mínimo y sin dependencias (multipart, base64, quoted-printable, `message/rfc822`, `text/rfc822-headers`). Fixtures `.eml` escritos a mano según los formatos de Postfix, Gmail, Microsoft 365, Exim y ARF: sustituir por capturas reales cuando las haya.
+- Pendiente: leer el buzón por IMAP (paquete aparte, encima de esta función).
+
+El driver SMTP añade para esto `X-Relayo-Metadata` (desactivable con `metadataHeader: false`) y la opción `bounceAddress` (remitente del sobre). Nodemailer sustituye el sobre completo, así que el driver vuelve a listar los destinatarios: probado contra un servidor SMTP real, sin filtrar el Bcc.
+
+### Reintentos en el core (ADR 6)
+
+`createRelayo({ retry: { attempts, minDelayMs, maxDelayMs, factor, jitter, onRetry } })`, desactivado por defecto. Solo reintenta errores `retryable`, con backoff exponencial y jitter y el mismo `messageId`. Un `RateLimitError` espera su `retryAfter`, o se lanza si supera `maxDelayMs` (que lo gestione la cola). Con `failover()`, cada intento recorre todos los proveedores. En `sendBatch` se aplica mensaje a mensaje, nunca a un lote nativo (reenviaría los que sí salieron).
+
+### Baja con un clic
+
+`EmailMessage.unsubscribe: { url?, mailto?, oneClick? }`: el core genera `List-Unsubscribe` y, para urls https, `List-Unsubscribe-Post: List-Unsubscribe=One-Click` (RFC 8058, exigido por Gmail y Yahoo a los envíos masivos). Funciona con todos los drivers porque se convierte en cabeceras antes de llegar a ellos. No se puede combinar con cabeceras `List-Unsubscribe` escritas a mano. `listUnsubscribeHeaders()` está exportado para quien construya las cabeceras por su cuenta.
+
 ### Errores entre copias del core
 
 Si una app acaba con dos copias de `@alimzen/core` (build ESM y CJS a la vez, o dos versiones), `instanceof` fallaría y, por ejemplo, un error de firma se trataría como un 500. Los `RelayoError` llevan una marca global (`Symbol.for('@alimzen/core:error')`) y `instanceof` reconoce por marca y `code` los errores de otra copia. Las subclases definen `static readonly code`.

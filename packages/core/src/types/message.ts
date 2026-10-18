@@ -24,6 +24,19 @@ export interface BaseMessage {
   providerOptions?: Record<string, unknown>;
 }
 
+/**
+ * One-click unsubscribe. Relayo turns it into `List-Unsubscribe` / `List-Unsubscribe-Post` headers.
+ * The url receives a POST with body `List-Unsubscribe=One-Click` when the recipient unsubscribes.
+ */
+export interface Unsubscribe {
+  /** https url for one-click unsubscribe. Put a token in it that identifies the recipient. */
+  url?: string;
+  /** Address that receives unsubscribe requests by email. */
+  mailto?: string;
+  /** Advertise one-click (RFC 8058). Default true when `url` is set. */
+  oneClick?: boolean;
+}
+
 export interface EmailMessage extends BaseMessage {
   from: Recipient;
   replyTo?: Recipient;
@@ -34,6 +47,7 @@ export interface EmailMessage extends BaseMessage {
   text?: string;
   attachments?: Attachment[];
   headers?: Record<string, string>;
+  unsubscribe?: Unsubscribe;
 }
 
 export interface SmsMessage extends BaseMessage {

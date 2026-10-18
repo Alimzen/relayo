@@ -11,6 +11,8 @@ import { toRelayoError } from './errors.js';
 
 /** Header carrying Relayo's message id, so bounces and other replies can be mapped back. */
 export const MESSAGE_ID_HEADER = 'X-Relayo-Message-ID';
+/** Header carrying `metadata` (base64url JSON), so it comes back in bounce reports. */
+export const METADATA_HEADER = 'X-Relayo-Metadata';
 
 export type SmtpTransport =
   | string
@@ -21,6 +23,17 @@ export type SmtpTransport =
 export interface SmtpDriverOptions {
   /** Provider name reported in results, events and errors. Defaults to `"smtp"`. */
   name?: string;
+  /**
+   * Send `metadata` in the `X-Relayo-Metadata` header, so bounce reports quoting the original headers
+   * bring it back (see `@alimzen/bounces`). Recipients can see headers: turn it off for sensitive
+   * metadata. Default true.
+   */
+  metadataHeader?: boolean;
+  /**
+   * Envelope sender (`MAIL FROM`, the Return-Path) for every message: where receiving servers send bounce
+   * reports. Defaults to the `from` address. Point it at a mailbox you read with `@alimzen/bounces`.
+   */
+  bounceAddress?: string;
 }
 
 export interface SmtpDriver extends Driver<EmailMessage> {
@@ -58,7 +71,7 @@ export function smtp(transport: SmtpTransport, options: SmtpDriverOptions = {}):
     async send(message, context) {
       let info: { messageId?: string; rejected?: string[] | undefined };
       try {
-        info = await transporter.sendMail(toMailOptions(message, context));
+        info = await transporter.sendMail(toMailOptions(message, context, options));
       } catch (error) {
         throw toRelayoError(error, name);
       }
@@ -82,14 +95,28 @@ export function smtp(transport: SmtpTransport, options: SmtpDriverOptions = {}):
   };
 }
 
-export function toMailOptions(message: EmailMessage, context: SendContext): SendMailOptions {
+export function toMailOptions(
+  message: EmailMessage,
+  context: SendContext,
+  options: Pick<SmtpDriverOptions, 'metadataHeader' | 'bounceAddress'> = {},
+): SendMailOptions {
+  const headers: Record<string, string> = { ...message.headers, [MESSAGE_ID_HEADER]: context.messageId };
+  if (message.metadata && options.metadataHeader !== false) {
+    headers[METADATA_HEADER] = Buffer.from(JSON.stringify(message.metadata), 'utf8').toString('base64url');
+  }
+  const to = Array.isArray(message.to) ? message.to : [message.to];
   const mail: SendMailOptions = {
     messageId: `<${context.messageId}@${domainOf(message.from.address)}>`,
     from: toAddress(message.from),
-    to: toAddresses(Array.isArray(message.to) ? message.to : [message.to]),
+    to: toAddresses(to),
     subject: message.subject,
-    headers: { ...message.headers, [MESSAGE_ID_HEADER]: context.messageId },
+    headers,
   };
+  if (options.bounceAddress) {
+    // Nodemailer replaces the whole envelope, so the recipients have to be listed again.
+    const recipients = [...to, ...(message.cc ?? []), ...(message.bcc ?? [])].map((r) => r.address);
+    mail.envelope = { from: options.bounceAddress, to: recipients };
+  }
   if (message.cc) mail.cc = toAddresses(message.cc);
   if (message.bcc) mail.bcc = toAddresses(message.bcc);
   if (message.replyTo) mail.replyTo = toAddress(message.replyTo);

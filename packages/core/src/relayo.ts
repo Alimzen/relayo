@@ -2,6 +2,8 @@ import { ValidationError, WebhookVerificationError } from './errors.js';
 import type { Driver, SendContext, SendResult, WebhookRequest } from './types/driver.js';
 import type { EventOf, EventType, RelayoEvent } from './types/events.js';
 import type { BaseMessage, Channel, EmailMessage, SmsMessage } from './types/message.js';
+import { withRetry, type RetryOptions } from './retry.js';
+import { withUnsubscribeHeaders } from './unsubscribe.js';
 import { validate } from './validate.js';
 
 export interface RelayoConfig {
@@ -9,13 +11,19 @@ export interface RelayoConfig {
   sms?: Driver<SmsMessage>;
   /** Generates Relayo message ids. Defaults to `crypto.randomUUID()`. */
   generateId?: () => string;
+  /**
+   * Retry sends that fail with a retryable error, in process. Off by default: if your sends already go
+   * through a queue that retries, leave it off to avoid duplicates.
+   */
+  retry?: RetryOptions;
 }
 
 export interface ChannelClient<M extends BaseMessage> {
   send(message: M): Promise<SendResult>;
   /**
    * Sends several messages. Uses the driver's native batch when available, otherwise sends them
-   * concurrently. All messages are validated before any is sent.
+   * concurrently. All messages are validated before any is sent. `retry` applies to each message when
+   * they are sent one by one, never to a native batch (it would resend the messages that went out).
    */
   sendBatch(messages: M[]): Promise<SendResult[]>;
 }
@@ -66,21 +74,30 @@ export function createRelayo(config: RelayoConfig): Relayo {
 
   function client<M extends BaseMessage>(channel: Channel): ChannelClient<M> {
     return {
-      async send(message) {
+      async send(input) {
         const driver = getDriver<M>(channel);
+        const message = prepare(input, channel);
         validate(message, driver);
-        return driver.send(message, { messageId: generateId() });
+        const context: SendContext = { messageId: generateId() };
+        return withRetry(() => driver.send(message, context), config.retry, message, context);
       },
-      async sendBatch(messages) {
+      async sendBatch(inputs) {
         const driver = getDriver<M>(channel);
+        const messages = inputs.map((m) => prepare(m, channel));
         messages.forEach((m) => validate(m, driver));
         const contexts: SendContext[] = messages.map(() => ({ messageId: generateId() }));
         if (driver.capabilities.batch && driver.sendBatch) {
           return driver.sendBatch(messages, contexts);
         }
-        return Promise.all(messages.map((m, i) => driver.send(m, contexts[i]!)));
+        return Promise.all(
+          messages.map((m, i) => withRetry(() => driver.send(m, contexts[i]!), config.retry, m, contexts[i]!)),
+        );
       },
     };
+  }
+
+  function prepare<M extends BaseMessage>(message: M, channel: Channel): M {
+    return channel === 'email' ? (withUnsubscribeHeaders(message as unknown as EmailMessage) as unknown as M) : message;
   }
 
   async function emit(event: RelayoEvent): Promise<void> {

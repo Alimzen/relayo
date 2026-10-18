@@ -13,6 +13,10 @@ export {
 } from './errors.js';
 export type { RelayoErrorOptions } from './errors.js';
 
+export type { RetryAttempt, RetryOptions } from './retry.js';
+
+export { listUnsubscribeHeaders } from './unsubscribe.js';
+
 export { failover } from './failover.js';
 export type { FailoverAttempt, FailoverDriver, FailoverOptions } from './failover.js';
 

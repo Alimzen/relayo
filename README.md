@@ -42,6 +42,7 @@ relayo.on('bounced', (event) => {
 | [`@alimzen/smtp`](packages/smtp) | Any SMTP server, built on Nodemailer |
 | [`@alimzen/ses`](packages/ses) | Amazon SES (v2 API), events through SNS with signature verification |
 | [`@alimzen/sendgrid`](packages/sendgrid) | SendGrid v3 API, signed Event Webhook |
+| [`@alimzen/bounces`](packages/bounces) | Bounce reports (DSN) and spam complaints (ARF) received by email, for your own mail server |
 | [`@alimzen/nestjs`](packages/nestjs) | `RelayoModule`, injectable `RelayoService`, `@OnRelayoEvent()`, webhook controller |
 
 SMS (Twilio) and more email providers (Mailgun, Postmark, Resend) are on the roadmap.
@@ -58,8 +59,8 @@ SMS (Twilio) and more email providers (Mailgun, Postmark, Resend) are on the roa
 - **Errors say whether to retry.** Every error is a `RelayoError` with a `code` and a `retryable` flag.
   `failover()` uses it to switch providers on outages and rate limits, and stops on errors another
   provider wouldn't fix.
-- **No hidden retries.** The core doesn't retry on its own: in production retries usually live in a queue
-  (e.g. BullMQ), and two layers of retries mean duplicate emails.
+- **No hidden retries.** The core retries only if you configure it: in production retries usually live in
+  a queue (e.g. BullMQ), and two layers of retries mean duplicate emails.
 
 ## Development
 

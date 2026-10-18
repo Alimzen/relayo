@@ -40,6 +40,7 @@ next to your record if you want to match events by id; `metadata` usually does t
 | `subject`, `html`, `text` | Email needs a subject and `html` or `text`. Templates are rendered before sending |
 | `attachments` | `{ filename, content: string \| Uint8Array, contentType?, cid? }` |
 | `headers` | Extra email headers |
+| `unsubscribe` | `{ url?, mailto?, oneClick? }`: adds `List-Unsubscribe` headers, one-click (RFC 8058) for https urls |
 | `metadata` | `Record<string, string>` carried to every event |
 | `tags` | Provider tags/categories, where supported |
 | `providerOptions` | Escape hatch: merged into the provider request as-is |
@@ -131,7 +132,33 @@ try {
 }
 ```
 
-Relayo never retries on its own.
+Relayo doesn't retry unless you ask it to. In production retries usually belong to your queue; if you
+don't have one, enable them in process:
+
+```ts
+createRelayo({
+  email: ses({ region: 'us-east-1' }),
+  retry: { attempts: 3, minDelayMs: 200, maxDelayMs: 5000, onRetry: ({ attempt, error }) => log(attempt, error.code) },
+});
+```
+
+Only retryable errors are retried, with exponential backoff and jitter and the same `messageId`. A
+`RateLimitError` waits its `retryAfter`, or is thrown right away when that is longer than `maxDelayMs`. With
+`failover()`, each attempt goes through every provider again.
+
+## Unsubscribe
+
+Gmail and Yahoo require one-click unsubscribe from bulk senders:
+
+```ts
+await relayo.email.send({
+  ...message,
+  unsubscribe: { url: `https://example.com/unsubscribe?t=${token}`, mailto: 'unsubscribe@example.com' },
+});
+```
+
+The mailbox provider then POSTs `List-Unsubscribe=One-Click` to that url when the recipient clicks
+"Unsubscribe": handle it in your app and stop sending to them.
 
 ## Failover
 

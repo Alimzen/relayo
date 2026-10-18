@@ -1,0 +1,52 @@
+Delivered-To: bounces@empresa.com
+Return-Path: <>
+From: Mail Delivery Subsystem <mailer-daemon@googlemail.com>
+To: bounces@empresa.com
+Auto-Submitted: auto-replied
+Subject: Delivery Status Notification (Failure)
+References: <7b1f3c9e-6a4d-4c1e-9d2b-1f0e8a7c6b5d@empresa.com>
+In-Reply-To: <7b1f3c9e-6a4d-4c1e-9d2b-1f0e8a7c6b5d@empresa.com>
+X-Failed-Recipients: noexiste@gmail.com
+Message-ID: <6512b3a1.170a0220.abcd.1234.GMR@mx.google.com>
+Date: Sat, 17 Oct 2026 03:00:06 -0700 (PDT)
+MIME-Version: 1.0
+Content-Type: multipart/report; boundary="000000000000a1b2c3d4"; report-type=delivery-status
+
+--000000000000a1b2c3d4
+Content-Type: text/plain; charset="UTF-8"
+
+** Address not found **
+
+Your message wasn't delivered to noexiste@gmail.com because the address couldn't be found, or is unable to receive mail.
+
+--000000000000a1b2c3d4
+Content-Type: message/delivery-status
+
+Reporting-MTA: dns; googlemail.com
+Received-From-MTA: dns; mail.empresa.com
+Arrival-Date: Sat, 17 Oct 2026 03:00:05 -0700 (PDT)
+X-Original-Message-ID: <7b1f3c9e-6a4d-4c1e-9d2b-1f0e8a7c6b5d@empresa.com>
+
+Final-Recipient: rfc822; noexiste@gmail.com
+Action: failed
+Status: 5.1.1
+Remote-MTA: dns; gmail-smtp-in.l.google.com. (2607:f8b0:4864:20::1034)
+Diagnostic-Code: smtp; 550-5.1.1 The email account that you tried to reach does
+ not exist. Please try double-checking the recipient's email address for typos
+ or unnecessary spaces. https://support.google.com/mail/?p=NoSuchUser
+Last-Attempt-Date: Sat, 17 Oct 2026 03:00:06 -0700 (PDT)
+
+--000000000000a1b2c3d4
+Content-Type: message/rfc822
+
+From: Facturas <facturas@empresa.com>
+To: noexiste@gmail.com
+Subject: Tu factura de octubre
+Message-ID: <7b1f3c9e-6a4d-4c1e-9d2b-1f0e8a7c6b5d@empresa.com>
+Date: Sat, 17 Oct 2026 10:00:01 +0000
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+
+Hola
+
+--000000000000a1b2c3d4--

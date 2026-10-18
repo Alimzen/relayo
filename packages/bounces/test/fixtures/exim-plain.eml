@@ -1,0 +1,23 @@
+Return-path: <>
+From: Mail Delivery System <Mailer-Daemon@mail.example.net>
+To: bounces@empresa.com
+Subject: Mail delivery failed: returning message to sender
+Message-Id: <E1qXYZ-0001-AB@mail.example.net>
+Date: Sat, 17 Oct 2026 10:00:09 +0000
+X-Failed-Recipients: borrado@example.net
+Auto-Submitted: auto-replied
+
+This message was created automatically by mail delivery software.
+
+A message that you sent could not be delivered to one or more of its
+recipients. This is a permanent error. The following address(es) failed:
+
+  borrado@example.net
+    host mx.example.net [198.51.100.9]
+    SMTP error from remote mail server after RCPT TO:<borrado@example.net>:
+    550 5.2.1 The email account that you tried to reach is disabled
+
+------ This is a copy of the message, including all the headers. ------
+
+Message-ID: <7b1f3c9e-6a4d-4c1e-9d2b-1f0e8a7c6b5d@empresa.com>
+Subject: Tu factura de octubre

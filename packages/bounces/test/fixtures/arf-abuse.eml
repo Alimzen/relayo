@@ -1,0 +1,43 @@
+From: <staff@hotmail.example>
+Date: Sat, 17 Oct 2026 12:00:00 +0000
+Subject: complaint about message from 192.0.2.25
+To: abuse@empresa.com
+Message-ID: <arf-0001@feedback.example>
+MIME-Version: 1.0
+Content-Type: multipart/report; report-type=feedback-report;
+     boundary="part1_13d.2e68ed54_boundary"
+
+--part1_13d.2e68ed54_boundary
+Content-Type: text/plain; charset="US-ASCII"
+Content-Transfer-Encoding: 7bit
+
+This is an email abuse report for an email message received from IP
+192.0.2.25 on Sat, 17 Oct 2026 10:00:01 +0000.
+
+--part1_13d.2e68ed54_boundary
+Content-Type: message/feedback-report
+
+Feedback-Type: abuse
+User-Agent: SomeGenerator/1.0
+Version: 1
+Original-Mail-From: <bounces@empresa.com>
+Original-Rcpt-To: <cliente@example.com>
+Arrival-Date: Sat, 17 Oct 2026 10:00:02 +0000
+Reported-Domain: empresa.com
+Source-IP: 192.0.2.25
+
+--part1_13d.2e68ed54_boundary
+Content-Type: message/rfc822
+Content-Disposition: inline
+
+From: Facturas <facturas@empresa.com>
+To: cliente@example.com
+Subject: Tu factura de octubre
+Message-ID: <7b1f3c9e-6a4d-4c1e-9d2b-1f0e8a7c6b5d@empresa.com>
+X-Relayo-Message-ID: 7b1f3c9e-6a4d-4c1e-9d2b-1f0e8a7c6b5d
+X-Relayo-Metadata: eyJpbnZvaWNlSWQiOiIxMjMifQ
+Date: Sat, 17 Oct 2026 10:00:01 +0000
+
+Hola
+
+--part1_13d.2e68ed54_boundary--

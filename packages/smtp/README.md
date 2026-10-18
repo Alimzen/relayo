@@ -25,6 +25,7 @@ smtp('smtps://user:pass@smtp.example.com');           // connection URL
 smtp({ pool: true, host: 'smtp.example.com', maxConnections: 5 }); // pooled connections
 smtp(existingNodemailerTransporter);                   // a transporter you already have
 smtp(options, { name: 'mailrelay' });                  // provider name in results, events and errors
+smtp(options, { bounceAddress: 'bounces@example.com' }); // envelope sender: where bounce reports go
 ```
 
 The driver adds:
@@ -38,6 +39,8 @@ The driver adds:
 
 - `Message-ID: <messageId@your-from-domain>` and an `X-Relayo-Message-ID` header with Relayo's id, so
   bounce reports (DSNs) can be matched to the original send.
+- `metadata` in an `X-Relayo-Metadata` header (base64 JSON), so it comes back with bounces. Recipients can
+  see headers: pass `{ metadataHeader: false }` if your metadata is sensitive.
 - Results have `status: 'sent'` once the server accepts the message. If the server refuses some recipients
   and accepts the rest, the refused ones are in `result.rejectedRecipients`.
 
@@ -57,5 +60,5 @@ The SMTP details (`responseCode`, `enhancedCode`, `response`, `rejected`) are in
 ## Webhooks
 
 SMTP has none. Problems the server reports during the session surface as errors or `rejectedRecipients`;
-bounces that happen later arrive as DSN emails to the envelope sender. Parsing them into Relayo events is
-planned.
+bounces that happen later arrive as emails to the envelope sender (`bounceAddress`, or your `from`).
+[`@alimzen/bounces`](../bounces) turns them, and spam complaints from feedback loops, into Relayo events.

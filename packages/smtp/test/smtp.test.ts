@@ -10,7 +10,7 @@ import {
 } from '@alimzen/core';
 import { SMTPServer, type SMTPServerOptions } from 'smtp-server';
 import { afterEach, describe, expect, it } from 'vitest';
-import { MESSAGE_ID_HEADER, smtp, toMailOptions, toRelayoError } from '../src/index.js';
+import { MESSAGE_ID_HEADER, METADATA_HEADER, smtp, toMailOptions, toRelayoError } from '../src/index.js';
 
 const message: EmailMessage = {
   from: { address: 'facturas@empresa.com', name: 'Facturas' },
@@ -28,6 +28,7 @@ function smtpError(responseCode: number, text: string): Error & { responseCode: 
 /** Local SMTP server that answers depending on the recipient's local part, like the simulator will. */
 async function startServer(overrides: Partial<SMTPServerOptions> = {}) {
   const received: string[] = [];
+  const envelopes: Array<{ from: string | false; to: string[] }> = [];
   const server = new SMTPServer({
     authOptional: true,
     disabledCommands: ['STARTTLS'],
@@ -46,6 +47,10 @@ async function startServer(overrides: Partial<SMTPServerOptions> = {}) {
         const blocked = session.envelope.rcptTo.some((r) => r.address.startsWith('blocked@'));
         if (blocked) return callback(smtpError(554, '5.7.1 Message rejected by policy'));
         received.push(Buffer.concat(chunks).toString('utf8'));
+        envelopes.push({
+          from: session.envelope.mailFrom && session.envelope.mailFrom.address,
+          to: session.envelope.rcptTo.map((r) => r.address),
+        });
         callback();
       });
     },
@@ -54,7 +59,7 @@ async function startServer(overrides: Partial<SMTPServerOptions> = {}) {
   await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
   const { port } = server.server.address() as AddressInfo;
   servers.push(server);
-  return { port, received };
+  return { port, received, envelopes };
 }
 
 const servers: SMTPServer[] = [];
@@ -86,9 +91,24 @@ describe('smtp driver against a real SMTP server', () => {
     const raw = received[0]!;
     expect(raw).toContain('Message-ID: <msg_abc@empresa.com>');
     expect(raw).toContain(`${MESSAGE_ID_HEADER}: msg_abc`);
+    expect(raw).toContain(`${METADATA_HEADER}: ${Buffer.from('{"facturaId":"123"}').toString('base64url')}`);
     expect(raw).toContain('Subject: Tu factura de octubre');
     expect(raw).toContain('From: Facturas <facturas@empresa.com>');
     expect(raw).toContain('filename=factura.pdf');
+  });
+
+  it('uses bounceAddress as envelope sender and keeps every recipient', async () => {
+    const { port, received, envelopes } = await startServer();
+    const driver = smtp({ host: '127.0.0.1', port, secure: false, ignoreTLS: true }, { bounceAddress: 'bounces@empresa.com' });
+
+    await driver.send(
+      { ...message, to: [{ address: 'ok@sim.test' }], cc: [{ address: 'cc@sim.test' }], bcc: [{ address: 'bcc@sim.test' }] },
+      { messageId: 'msg_1' },
+    );
+
+    expect(envelopes).toEqual([{ from: 'bounces@empresa.com', to: ['ok@sim.test', 'cc@sim.test', 'bcc@sim.test'] }]);
+    expect(received[0]).toContain('From: Facturas <facturas@empresa.com>');
+    expect(received[0]).not.toContain('bcc@sim.test');
   });
 
   it('reports recipients refused while the rest were accepted', async () => {
@@ -199,6 +219,11 @@ describe('toMailOptions', () => {
       replyTo: 'soporte@empresa.com',
       headers: { 'X-Campaign': 'oct', [MESSAGE_ID_HEADER]: 'msg_1' },
     });
+  });
+
+  it('leaves metadata out of the headers when asked', () => {
+    const mail = toMailOptions(message, { messageId: 'msg_1' }, { metadataHeader: false });
+    expect(mail.headers).toEqual({ [MESSAGE_ID_HEADER]: 'msg_1' });
   });
 
   it('lets providerOptions pass through to Nodemailer', () => {
