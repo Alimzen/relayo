@@ -17,7 +17,7 @@ inputs:
     description: API key of the Relayo Sim project. Needed for "start"; keep it in a secret.
     required: false
   cli-version:
-    description: Version of the relayo CLI (npm) to run.
+    description: Version of the @alimzen/cli package (the relayo command) to run.
     required: false
     default: '0'
 
@@ -31,7 +31,7 @@ runs:
       env:
         SIM_URL: ${{ inputs.url }}
         SIM_KEY: ${{ inputs.api-key }}
-        CLI: relayo@${{ inputs.cli-version }}
+        CLI: "@alimzen/cli@${{ inputs.cli-version }}"
       run: |
         if [ -z "$SIM_URL" ] || [ -z "$SIM_KEY" ]; then
           echo "::error title=Relayo Sim::The start step needs the url and api-key inputs."
@@ -51,7 +51,7 @@ runs:
       if: inputs.step == 'report'
       shell: bash
       env:
-        CLI: relayo@${{ inputs.cli-version }}
+        CLI: "@alimzen/cli@${{ inputs.cli-version }}"
       run: |
         if [ -z "$RELAYO_SIM_SINCE" ]; then
           echo "::warning title=Relayo Sim::Run this action with step: start before the tests to get a report."

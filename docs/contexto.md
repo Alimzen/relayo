@@ -23,9 +23,9 @@ Posicionamiento: suite de herramientas de mensajería para desarrolladores. **No
 | Simulador (SaaS) | Relayo Sim |
 | Bandeja de captura | Relayo Inbox |
 | Simulador de flujos | Relayo Flows |
-| CLI | `relayo` |
+| CLI | comando `relayo`, paquete `@alimzen/cli` |
 
-Los paquetes se publican bajo el scope **`@alimzen`** (org de npm `alimzen`, repo `github.com/Alimzen/relayo`): el scope `@relayo` de npm pertenece a otra persona. El producto y la API siguen llamándose Relayo. El nombre sin scope `relayo` estaba libre en octubre de 2026 y se reserva para la CLI cuando exista.
+Los paquetes se publican bajo el scope **`@alimzen`** (org de npm `alimzen`, repo `github.com/Alimzen/relayo`): el scope `@relayo` de npm pertenece a otra persona. El producto y la API siguen llamándose Relayo. npm no deja publicar `relayo` sin scope (lo rechaza por parecido con `delay`), así que la CLI es `@alimzen/cli` y su comando, `relayo`.
 
 Pendiente: dominio (`relayo.dev` / `relayo.io`) y revisar registro de marca.
 
@@ -42,7 +42,7 @@ Pendiente: dominio (`relayo.dev` / `relayo.io`) y revisar registro de marca.
 
 Hito de validación del negocio: al final de la fase 3, los usuarios beta integran el simulador en su CI y lo siguen usando.
 
-**Estado actual:** fases 0, 1 y 2 completas. Librería publicada en npm como `@alimzen/*`. Relayo Sim (repo privado `relayo-sim`): motor de escenarios, SMTP y API, webhooks firmados, PostgreSQL y BullMQ, informes DSN/ARF por correo y panel Angular, probados de punta a punta con la librería. Fase 3 en curso: hechos la bandeja de captura (correo completo con vista previa, adjuntos y original), la CLI `relayo` con la GitHub Action `actions/sim`, y la landing con el despliegue (Docker + Caddy, `relayo-sim/deploy`). Pendiente: elegir dominio y desplegar, freemium (límites por plan y retención) y usuarios beta.
+**Estado actual:** fases 0, 1 y 2 completas. Librería publicada en npm como `@alimzen/*`. Relayo Sim (repo privado `relayo-sim`): motor de escenarios, SMTP y API, webhooks firmados, PostgreSQL y BullMQ, informes DSN/ARF por correo y panel Angular, probados de punta a punta con la librería. Fase 3 en curso: hechos la bandeja de captura (correo completo con vista previa, adjuntos y original), la CLI (`@alimzen/cli`, comando `relayo`) con la GitHub Action `actions/sim`, y la landing con el despliegue (Docker + Caddy, `relayo-sim/deploy`). Pendiente: elegir dominio y desplegar, freemium (límites por plan y retención) y usuarios beta.
 
 ## Stack
 

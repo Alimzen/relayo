@@ -1,6 +1,6 @@
 {
-  "name": "relayo",
-  "version": "0.0.0",
+  "name": "@alimzen/cli",
+  "version": "0.1.0",
   "description": "Command line for Relayo Sim: send test emails, inspect their timelines and wait for bounces, complaints or deliveries in CI.",
   "license": "MIT",
   "author": "Alimzen",

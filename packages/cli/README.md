@@ -1,9 +1,10 @@
-# relayo
+# @alimzen/cli
 
-Command line for [Relayo Sim](https://github.com/Alimzen/relayo/tree/main/packages/simulator), the email delivery simulator: send test emails, read their timelines, and **wait in CI for the bounce, complaint or delivery your code must handle**.
+The `relayo` command, for [Relayo Sim](https://github.com/Alimzen/relayo/tree/main/packages/simulator), the email delivery simulator: send test emails, read their timelines, and **wait in CI for the bounce, complaint or delivery your code must handle**.
 
 ```sh
-npx relayo --help
+npm install --save-dev @alimzen/cli   # then: npx relayo --help
+npx @alimzen/cli --help                # or run it without installing
 ```
 
 Node 20+. No dependencies.
@@ -47,7 +48,7 @@ On GitHub, the [Relayo Sim action](https://github.com/Alimzen/relayo/tree/main/a
 ## Programmatic use
 
 ```ts
-import { run, SimClient } from 'relayo';
+import { run, SimClient } from '@alimzen/cli';
 
 const sim = new SimClient(process.env.RELAYO_SIM_URL!, process.env.RELAYO_SIM_API_KEY!);
 const message = await sim.message('sim_8c1…');

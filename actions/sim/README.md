@@ -22,7 +22,7 @@ jobs:
       - run: npm test
 
       # Assert outcomes from the shell too, if you like.
-      - run: npx relayo wait --search "Welcome" --for delivered
+      - run: npx @alimzen/cli wait --search "Welcome" --for delivered
 
       # Summary of what happened to every email sent since "start", even when tests fail.
       - uses: Alimzen/relayo/actions/sim@main
@@ -38,7 +38,7 @@ jobs:
 | `step` | `start` (default) or `report` | |
 | `url` | Base URL of Relayo Sim | Needed for `start` |
 | `api-key` | API key of the project | Needed for `start`; keep it in a secret. It is masked in logs. |
-| `cli-version` | Version of the [`relayo`](https://www.npmjs.com/package/relayo) CLI to run | Default `0` (latest 0.x) |
+| `cli-version` | Version of [`@alimzen/cli`](https://www.npmjs.com/package/@alimzen/cli) (the `relayo` command) to run | Default `0` (latest 0.x) |
 
 `start` fails the job with a clear message when the simulator cannot be reached or the key is wrong, before your tests waste time on it.
 
