@@ -42,7 +42,7 @@ Pendiente: dominio (`relayo.dev` / `relayo.io`) y revisar registro de marca.
 
 Hito de validación del negocio: al final de la fase 3, los usuarios beta integran el simulador en su CI y lo siguen usando.
 
-**Estado actual:** fases 0, 1 y 2 completas. Librería publicada en npm como `@alimzen/*`. Relayo Sim (repo privado `relayo-sim`): motor de escenarios, SMTP y API, webhooks firmados, PostgreSQL y BullMQ, informes DSN/ARF por correo y panel Angular, probados de punta a punta con la librería. Siguiente: fase 3 (bandeja de captura, CLI / GitHub Action, landing, freemium, beta).
+**Estado actual:** fases 0, 1 y 2 completas. Librería publicada en npm como `@alimzen/*`. Relayo Sim (repo privado `relayo-sim`): motor de escenarios, SMTP y API, webhooks firmados, PostgreSQL y BullMQ, informes DSN/ARF por correo y panel Angular, probados de punta a punta con la librería. Fase 3 en curso: hechos la bandeja de captura (correo completo con vista previa, adjuntos y original), la CLI `relayo` con la GitHub Action `actions/sim`, y la landing con el despliegue (Docker + Caddy, `relayo-sim/deploy`). Pendiente: elegir dominio y desplegar, freemium (límites por plan y retención) y usuarios beta.
 
 ## Stack
 

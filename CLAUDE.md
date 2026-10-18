@@ -2,7 +2,7 @@
 
 Librería open source para enviar email/SMS de forma agnóstica del proveedor y **normalizar los eventos de vuelta** (rebotes, quejas, bajas…), más un simulador de entrega de pago (Relayo Sim). No es un CRM.
 
-Contexto completo, roadmap, contratos y ADRs: [docs/contexto.md](docs/contexto.md). Estado: fases 0, 1 y 2 hechas (Relayo Sim en el repo privado `relayo-sim`); siguiente: fase 3.
+Contexto completo, roadmap, contratos y ADRs: [docs/contexto.md](docs/contexto.md). Estado: fases 0, 1 y 2 hechas (Relayo Sim en el repo privado `relayo-sim`); fase 3 en curso (falta dominio y despliegue, freemium y beta).
 
 ## Repo
 
