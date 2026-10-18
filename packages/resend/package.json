@@ -1,6 +1,6 @@
 {
   "name": "@alimzen/resend",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Resend driver for Relayo: sending through the Resend API and normalized events from its signed webhooks.",
   "license": "MIT",
   "author": "Alimzen",

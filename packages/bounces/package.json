@@ -1,6 +1,6 @@
 {
   "name": "@alimzen/bounces",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Turns bounce reports (DSN, RFC 3464) and spam complaints (ARF, RFC 5965) received by email into Relayo events.",
   "license": "MIT",
   "author": "Alimzen",

@@ -1,6 +1,6 @@
 {
   "name": "@alimzen/imap",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Reads a bounce mailbox over IMAP and turns bounce reports and spam complaints into Relayo events.",
   "license": "MIT",
   "author": "Alimzen",
