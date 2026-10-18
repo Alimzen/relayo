@@ -58,4 +58,8 @@ with an `X-Sim-Scenario` header that applies to every recipient. Any other addre
 The simulator also has an SMTP endpoint (password: your API key), so apps sending through
 `@alimzen/smtp`, or any other language, get the same scenarios as live SMTP answers.
 
+Over SMTP, refusing scenarios answer during the session. Add `+async` (`hard-bounce+async@`) to have the
+simulator accept the message and bounce it later, mailing a DSN to the envelope sender, as a relay would: that
+is how you test reading your bounce mailbox with [`@alimzen/imap`](../imap). Complaints come back as ARF reports.
+
 `baseUrl` is required: the driver never sends your API key to a default host.
