@@ -31,7 +31,8 @@ const CONFIG_CODES = new Set([
   'EURLACCESS',
   'ERR_ACCESS_DENIED',
 ]);
-const RATE_LIMIT_TEXT = /rate|too many|throttl|try (again )?later|limit exceeded/i;
+// Only explicit throttling: "try again later" alone also comes with greylisting and busy servers.
+const RATE_LIMIT_TEXT = /rate|too many|throttl|limit exceeded/i;
 const ENHANCED_CODE = /\b([245]\.\d{1,3}\.\d{1,3})\b/;
 
 export function smtpErrorDetails(err: NodemailerError): SmtpErrorDetails {

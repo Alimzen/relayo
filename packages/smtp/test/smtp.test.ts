@@ -242,7 +242,9 @@ describe('toRelayoError', () => {
     [{ code: 'EENVELOPE', message: 'No recipients defined' }, ValidationError],
     [{ code: 'ECONFIG' }, ValidationError],
     [{ code: 'EMESSAGE', responseCode: 552, response: '552 5.3.4 Message too big' }, RejectedError],
-    [{ code: 'EENVELOPE', responseCode: 421, response: '421 4.7.0 Try again later' }, RateLimitError],
+    [{ code: 'EENVELOPE', responseCode: 421, response: '421 4.7.0 Try again later' }, ProviderUnavailableError],
+    [{ code: 'EENVELOPE', responseCode: 451, response: '451 4.7.1 Greylisted, please try again later' }, ProviderUnavailableError],
+    [{ code: 'EENVELOPE', responseCode: 421, response: '421 4.7.0 Too many connections, try again later' }, RateLimitError],
     [{ code: 'EMESSAGE', responseCode: 451, response: '451 4.3.0 Local error' }, ProviderUnavailableError],
   ] as Array<[{ code: string; responseCode?: number; response?: string; message?: string }, unknown]>)('maps %o', (err, expected) => {
     expect(toRelayoError(Object.assign(new Error(err.message ?? 'x'), err), 'smtp')).toBeInstanceOf(expected);

@@ -22,7 +22,8 @@ const SMTP_CODE = /\b([245]\d\d)\b/;
 const TEXT_RULES: Array<[RegExp, BounceReason]> = [
   [/spf|dkim|dmarc|not authenticated|authentication (failed|required)|unauthenticated/i, 'auth_failure'],
   [/spamhaus|blacklist|blocklist|block ?list|black ?list|reputation|listed (at|on|in)|rbl|dnsbl|barracuda/i, 'reputation_block'],
-  [/rate limit|too many (messages|connections|emails)|throttl|unusual rate|try again later/i, 'rate_limited'],
+  // "Try again later" alone is not a rate limit: greylisting and busy servers say it too.
+  [/rate limit|too many (messages|connections|emails)|throttl|unusual rate/i, 'rate_limited'],
   [/too (large|big)|size (limit|exceeded)|exceeds .*size/i, 'message_too_large'],
   [/spam|content (rejected|refused)|virus|malware|phish/i, 'content_rejected'],
   [/quota|mailbox (is )?full|over ?quota|insufficient (storage|space)/i, 'mailbox_full'],

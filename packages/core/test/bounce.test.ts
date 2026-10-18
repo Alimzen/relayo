@@ -25,6 +25,8 @@ describe('classifyBounce', () => {
     // Temporary and unknown
     [{ diagnostic: '451 4.3.0 Mail server temporarily rejected message' }, 'soft', 'temporary_failure'],
     [{ smtpCode: 450 }, 'soft', 'temporary_failure'],
+    [{ diagnostic: '451 4.7.1 Greylisted, please try again later' }, 'block', 'policy_block'],
+    [{ diagnostic: '421 4.3.2 Service busy, try again later' }, 'soft', 'temporary_failure'],
     [{ diagnostic: '554 5.0.0 Error' }, 'hard', 'unknown'],
     [{}, 'hard', 'unknown'],
   ] as const)('%o → %s/%s', (input, bounceType, reason) => {
