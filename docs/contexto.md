@@ -17,15 +17,15 @@ Posicionamiento: suite de herramientas de mensajería para desarrolladores. **No
 
 | Pieza | Nombre |
 | --- | --- |
-| Librería core | `@alimzen/core` |
-| Drivers | `@alimzen/ses`, `@alimzen/sendgrid`, `@alimzen/smtp`, `@alimzen/twilio` |
-| Módulo NestJS | `@alimzen/nestjs` |
+| Librería core | `@alimzen/relayo` |
+| Drivers | `@alimzen/relayo-ses`, `@alimzen/relayo-sendgrid`, `@alimzen/relayo-smtp`, `@alimzen/relayo-twilio` |
+| Módulo NestJS | `@alimzen/relayo-nestjs` |
 | Simulador (SaaS) | Relayo Sim |
 | Bandeja de captura | Relayo Inbox |
 | Simulador de flujos | Relayo Flows |
-| CLI | comando `relayo`, paquete `@alimzen/cli` |
+| CLI | comando `relayo`, paquete `@alimzen/relayo-cli` |
 
-Los paquetes se publican bajo el scope **`@alimzen`** (org de npm `alimzen`, repo `github.com/Alimzen/relayo`): el scope `@relayo` de npm pertenece a otra persona. El producto y la API siguen llamándose Relayo. npm no deja publicar `relayo` sin scope (lo rechaza por parecido con `delay`), así que la CLI es `@alimzen/cli` y su comando, `relayo`.
+Los paquetes se publican bajo el scope **`@alimzen`** (org de npm `alimzen`, repo `github.com/Alimzen/relayo`): el scope `@relayo` de npm pertenece a otra persona. El producto y la API siguen llamándose Relayo. Hasta octubre de 2026 los paquetes se llamaban `@alimzen/core`, `@alimzen/smtp`…; se renombraron a `@alimzen/relayo` y `@alimzen/relayo-*` porque el scope `@alimzen` también tiene otras librerías (auth…) y `core` era ambiguo. Los nombres viejos quedan marcados como obsoletos en npm y no se reutilizan. npm no deja publicar `relayo` sin scope (lo rechaza por parecido con `delay`), así que la CLI es `@alimzen/relayo-cli` y su comando, `relayo`.
 
 Pendiente: dominio (`relayo.dev` / `relayo.io`) y revisar registro de marca.
 
@@ -42,7 +42,7 @@ Pendiente: dominio (`relayo.dev` / `relayo.io`) y revisar registro de marca.
 
 Hito de validación del negocio: al final de la fase 3, los usuarios beta integran el simulador en su CI y lo siguen usando.
 
-**Estado actual:** fases 0, 1 y 2 completas. Librería publicada en npm como `@alimzen/*`. Relayo Sim (repo privado `relayo-sim`): motor de escenarios, SMTP y API, webhooks firmados, PostgreSQL y BullMQ, informes DSN/ARF por correo y panel Angular, probados de punta a punta con la librería. Fase 3 en curso: hechos la bandeja de captura (correo completo con vista previa, adjuntos y original), la CLI (`@alimzen/cli`, comando `relayo`) con la GitHub Action `actions/sim`, y la landing con el despliegue (Docker + Caddy, `relayo-sim/deploy`). Pendiente: elegir dominio y desplegar, freemium (límites por plan y retención) y usuarios beta.
+**Estado actual:** fases 0, 1 y 2 completas. Librería publicada en npm como `@alimzen/*`. Relayo Sim (repo privado `relayo-sim`): motor de escenarios, SMTP y API, webhooks firmados, PostgreSQL y BullMQ, informes DSN/ARF por correo y panel Angular, probados de punta a punta con la librería. Fase 3 en curso: hechos la bandeja de captura (correo completo con vista previa, adjuntos y original), la CLI (`@alimzen/relayo-cli`, comando `relayo`) con la GitHub Action `actions/sim`, y la landing con el despliegue (Docker + Caddy, `relayo-sim/deploy`). Pendiente: elegir dominio y desplegar, freemium (límites por plan y retención) y usuarios beta.
 
 ## Stack
 
@@ -89,7 +89,7 @@ La bandera `retryable` es la base de los reintentos y del failover. Ver `errors.
 
 **Ajuste:** `SendResult.rejectedRecipients?: string[]` recoge los destinatarios que el proveedor rechazó en el momento mientras aceptaba el resto (típico en SMTP, donde cada `RCPT TO` tiene su propia respuesta).
 
-### Driver SMTP (`@alimzen/smtp`)
+### Driver SMTP (`@alimzen/relayo-smtp`)
 
 - Sobre Nodemailer 10. Acepta URL de conexión, opciones SMTP/pool de Nodemailer o un transporter ya creado.
 - Fija `Message-ID: <messageId@dominio-del-remitente>` y la cabecera `X-Relayo-Message-ID`, para que los DSN de rebote asíncronos se puedan asociar al envío original.
@@ -130,7 +130,7 @@ Función compartida por todos los drivers (y por el futuro lector de DSN y el si
 
 **Ajuste al contrato:** nuevo `RejectEvent` (`type: 'rejected'`, `reason: 'suppressed' | 'invalid_recipient' | 'content_rejected' | 'unknown'`).
 
-### Driver SES (`@alimzen/ses`)
+### Driver SES (`@alimzen/relayo-ses`)
 
 - Envío con SESv2 (`SendEmail`, contenido `Simple` con cabeceras y adjuntos). Resultado `status: 'queued'`.
 - El id de Relayo viaja como tag `relayo_message_id` y como cabecera `X-Relayo-Message-ID`; `metadata` en la cabecera `X-Relayo-Metadata` (JSON en base64url, visible para el destinatario; desactivable con `metadataHeader: false`). Los `tags` de Relayo se convierten en tags de SES (caracteres no válidos → `_`).
@@ -139,7 +139,7 @@ Función compartida por todos los drivers (y por el futuro lector de DSN y el si
 - Ids de evento `snsMessageId:índice`: estables ante reintentos de SNS, sirven para deduplicar.
 - Los fixtures (`packages/ses/test/fixtures/ses-events.json`) siguen los ejemplos de la documentación de AWS; hay que sustituirlos por payloads capturados de una cuenta real.
 
-### Driver SendGrid (`@alimzen/sendgrid`)
+### Driver SendGrid (`@alimzen/relayo-sendgrid`)
 
 - API v3 (`POST /v3/mail/send`) con `fetch`, sin SDK ni dependencias en runtime. Región `eu` para cuentas con residencia de datos en la UE, `sandbox` para validar sin entregar, timeout configurable (30 s por defecto). Resultado `status: 'queued'` con `X-Message-Id` como `providerMessageId`.
 - El id de Relayo y `metadata` viajan como `custom_args` (`relayo_message_id`, `relayo_metadata` en JSON): SendGrid los repite en cada evento y **no** son visibles para el destinatario, a diferencia de la cabecera de SES. Los `tags` se convierten en categorías (máximo 10; si hay más, `ValidationError` antes de llamar a la API).
@@ -150,7 +150,7 @@ Función compartida por todos los drivers (y por el futuro lector de DSN y el si
 - Ids de evento = `sg_event_id`, estable para deduplicar.
 - Fixtures en `packages/sendgrid/test/fixtures/events.json`, basados en los ejemplos de la documentación de SendGrid; sustituir por capturas reales.
 
-### Módulo NestJS (`@alimzen/nestjs`)
+### Módulo NestJS (`@alimzen/relayo-nestjs`)
 
 ```ts
 // main.ts: rawBody es necesario para verificar firmas (SendGrid, SNS)
@@ -196,7 +196,7 @@ Mismo patrón que SendGrid: `fetch` sin SDK ni dependencias, errores con `retrya
 | `idempotencyKey` | sí (`Idempotency-Key`, 24 h) | no | no |
 | Particularidades | 429 de cuota diaria → `retryAfter` hasta medianoche UTC; rebotes con los subtipos de SES | ErrorCode 406 (destinatario inactivo) → `RejectedError`; tipos propios de bounce (`Blocked`, `DMARCPolicy` → `block`) | `failed` temporal → `deferred`; `suppress-*` → `rejected`; `old` nunca `hard` |
 
-### Rebotes por correo (`@alimzen/bounces`)
+### Rebotes por correo (`@alimzen/relayo-bounces`)
 
 Cierra el caso del correo propio por SMTP, que no tiene webhooks: `parseBounceEmail(raw)` convierte el correo que llega al buzón de rebotes en eventos Relayo.
 
@@ -206,7 +206,7 @@ Cierra el caso del correo propio por SMTP, que no tiene webhooks: `parseBounceEm
 - Enlace con el envío: cabeceras citadas del original (`X-Relayo-Message-ID`, `X-Relayo-Metadata`) o, en su defecto, el `Message-ID` `<id@dominio>` que pone el driver SMTP.
 - Ids de evento derivados del informe: procesar el mismo buzón dos veces da los mismos ids.
 - Parser MIME propio, mínimo y sin dependencias (multipart, base64, quoted-printable, `message/rfc822`, `text/rfc822-headers`). Fixtures `.eml` escritos a mano según los formatos de Postfix, Gmail, Microsoft 365, Exim y ARF: sustituir por capturas reales cuando las haya.
-- Lectura automática del buzón: `@alimzen/imap` (`bounceMailbox({ connection }).watch(e => relayo.emit(e))`), sobre ImapFlow 2. Cada pasada abre y cierra su conexión, lee los no leídos y marca, mueve o borra cada mensaje solo después de que el handler haya procesado sus eventos; si falla, el mensaje queda sin leer y se reintenta (entrega al menos una vez, ids estables para deduplicar). Probado contra `hoodiecrow-imap`, un servidor IMAP en memoria. Sin IDLE: sondeo por intervalo, suficiente para rebotes.
+- Lectura automática del buzón: `@alimzen/relayo-imap` (`bounceMailbox({ connection }).watch(e => relayo.emit(e))`), sobre ImapFlow 2. Cada pasada abre y cierra su conexión, lee los no leídos y marca, mueve o borra cada mensaje solo después de que el handler haya procesado sus eventos; si falla, el mensaje queda sin leer y se reintenta (entrega al menos una vez, ids estables para deduplicar). Probado contra `hoodiecrow-imap`, un servidor IMAP en memoria. Sin IDLE: sondeo por intervalo, suficiente para rebotes.
 
 El driver SMTP añade para esto `X-Relayo-Metadata` (desactivable con `metadataHeader: false`) y la opción `bounceAddress` (remitente del sobre). Nodemailer sustituye el sobre completo, así que el driver vuelve a listar los destinatarios: probado contra un servidor SMTP real, sin filtrar el Bcc.
 
@@ -220,12 +220,12 @@ El driver SMTP añade para esto `X-Relayo-Metadata` (desactivable con `metadataH
 
 ### Errores entre copias del core
 
-Si una app acaba con dos copias de `@alimzen/core` (build ESM y CJS a la vez, o dos versiones), `instanceof` fallaría y, por ejemplo, un error de firma se trataría como un 500. Los `RelayoError` llevan una marca global (`Symbol.for('@alimzen/core:error')`) y `instanceof` reconoce por marca y `code` los errores de otra copia. Las subclases definen `static readonly code`.
+Si una app acaba con dos copias de `@alimzen/relayo` (build ESM y CJS a la vez, o dos versiones), `instanceof` fallaría y, por ejemplo, un error de firma se trataría como un 500. Los `RelayoError` llevan una marca global (`Symbol.for('@alimzen/core:error')`, con el nombre antiguo del paquete a propósito: así también se reconocen los errores de copias publicadas como `@alimzen/core`) y `instanceof` reconoce por marca y `code` los errores de otra copia. Las subclases definen `static readonly code`.
 
 ### Versiones y publicación
 
 - Con el peer `workspace:^`, Changesets publicaba los drivers como **1.0.0** ya en la primera versión (el core quedaba en 0.1.0) y volvía a subirlos de major con cada minor del core. Comprobado con `changeset version` en una copia del repo.
-- Solución adoptada: los drivers declaran el peer `@alimzen/core: ">=0.1.0 <1.0.0"` (rango explícito; el enlace local sigue viniendo de la `devDependency` `workspace:^`) y Changesets usa `onlyUpdatePeerDependentsWhenOutOfRange`. Resultado comprobado: primera versión 0.1.0 en los cinco paquetes, y después cada paquete sube por su cuenta.
+- Solución adoptada: los drivers declaran el peer `@alimzen/relayo: ">=0.1.0 <1.0.0"` (rango explícito; el enlace local sigue viniendo de la `devDependency` `workspace:^`) y Changesets usa `onlyUpdatePeerDependentsWhenOutOfRange`. Resultado comprobado: primera versión 0.1.0 en los cinco paquetes, y después cada paquete sube por su cuenta.
 - Contrapartida: durante 0.x el rango acepta cualquier core 0.x, así que npm no avisará si un core con cambios incompatibles se combina con un driver antiguo. Regla: un changeset que rompa el contrato del core debe incluir también los drivers afectados. Al llegar a 1.0, cambiar el peer a `^1.0.0`.
 - `publishConfig.exports` quita la condición `@alimzen/source` (apunta a `src/`, que no se publica) de los paquetes publicados.
 - La provenance de npm solo puede generarse desde CI; no va en `publishConfig` para que la publicación manual funcione.
@@ -291,7 +291,7 @@ Otros escenarios previstos: dominio sin MX, rate limiting (421), fallo SPF/DKIM/
 2. Salida dual ESM/CJS con `tsup` (muchos proyectos NestJS siguen en CJS). **Decidido (recomendado).**
 3. Node mínimo 20. **Decidido (recomendado).**
 4. Validación con Zod o Valibot en el core. **Por elegir la librería.** (Mientras tanto, `src/validate.ts` hace comprobaciones a mano.)
-5. Plantillas fuera del core en v1: se acepta `html`/`text` ya renderizado; más adelante `@alimzen/templates`. **Pendiente de confirmar.**
+5. Plantillas fuera del core en v1: se acepta `html`/`text` ya renderizado; más adelante `@alimzen/relayo-templates`. **Pendiente de confirmar.**
 6. Reintentos: el core los expone como configuración opcional, desactivados por defecto (en producción suelen vivir en una cola como BullMQ y duplicarlos genera envíos dobles). **Decidido (recomendado).**
 
 ## Validación con usuarios (en paralelo a la fase 0)
@@ -313,5 +313,5 @@ Las preguntas 4 y 5 son las decisivas.
 1. ~~Crear el monorepo (pnpm + Changesets + tsup + TypeScript estricto + Vitest).~~
 2. ~~Crear `packages/core` con los tipos (mensajes, eventos, errores, `Driver`).~~
 3. ~~Implementar `createRelayo` con un driver en memoria para tests.~~
-4. ~~Implementar `@alimzen/smtp` como primer driver real (sobre Nodemailer) y luego `@alimzen/ses`.~~
+4. ~~Implementar `@alimzen/relayo-smtp` como primer driver real (sobre Nodemailer) y luego `@alimzen/relayo-ses`.~~
 5. Escribir tests de normalización de webhooks con payloads reales de cada proveedor.

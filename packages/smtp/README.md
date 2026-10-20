@@ -1,17 +1,17 @@
-# @alimzen/smtp
+# @alimzen/relayo-smtp
 
 SMTP driver for [Relayo](../core), built on [Nodemailer](https://nodemailer.com). Works with any SMTP
 server: your own MTA, a relay, or a provider's SMTP endpoint.
 
 ```sh
-npm install @alimzen/core @alimzen/smtp
+npm install @alimzen/relayo @alimzen/relayo-smtp
 ```
 
 ## Usage
 
 ```ts
-import { createRelayo } from '@alimzen/core';
-import { smtp } from '@alimzen/smtp';
+import { createRelayo } from '@alimzen/relayo';
+import { smtp } from '@alimzen/relayo-smtp';
 
 const relayo = createRelayo({
   email: smtp({ host: 'smtp.example.com', port: 587, auth: { user: 'apikey', pass: process.env.SMTP_PASS! } }),
@@ -61,5 +61,5 @@ The SMTP details (`responseCode`, `enhancedCode`, `response`, `rejected`) are in
 
 SMTP has none. Problems the server reports during the session surface as errors or `rejectedRecipients`;
 bounces that happen later arrive as emails to the envelope sender (`bounceAddress`, or your `from`).
-[`@alimzen/bounces`](../bounces) turns them, and spam complaints from feedback loops, into Relayo events, and
-[`@alimzen/imap`](../imap) reads the mailbox for you.
+[`@alimzen/relayo-bounces`](../bounces) turns them, and spam complaints from feedback loops, into Relayo events, and
+[`@alimzen/relayo-imap`](../imap) reads the mailbox for you.

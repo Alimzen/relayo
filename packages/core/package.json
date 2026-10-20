@@ -1,5 +1,5 @@
 {
-  "name": "@alimzen/core",
+  "name": "@alimzen/relayo",
   "version": "0.2.1",
   "description": "Provider-agnostic messaging for Node: one API to send email and SMS, and normalized delivery events.",
   "license": "MIT",

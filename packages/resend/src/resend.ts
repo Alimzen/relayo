@@ -17,7 +17,7 @@ import {
   type SendContext,
   type SendResult,
   type WebhookRequest,
-} from '@alimzen/core';
+} from '@alimzen/relayo';
 
 export const MESSAGE_ID_TAG = 'relayo_message_id';
 export const METADATA_TAG = 'relayo_metadata';

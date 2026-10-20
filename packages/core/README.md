@@ -1,12 +1,12 @@
-# @alimzen/core
+# @alimzen/relayo
 
 Provider-agnostic email and SMS for Node.js: one API to send, one normalized event model for what comes
 back. This package holds the API, the contracts every driver implements, `failover()` and an in-memory
-driver for tests. Install a driver too: [`@alimzen/smtp`](../smtp), [`@alimzen/ses`](../ses) or
-[`@alimzen/sendgrid`](../sendgrid).
+driver for tests. Install a driver too: [`@alimzen/relayo-smtp`](../smtp), [`@alimzen/relayo-ses`](../ses) or
+[`@alimzen/relayo-sendgrid`](../sendgrid).
 
 ```sh
-npm install @alimzen/core @alimzen/ses
+npm install @alimzen/relayo @alimzen/relayo-ses
 ```
 
 Node.js 20+. Ships ESM and CommonJS.
@@ -14,8 +14,8 @@ Node.js 20+. Ships ESM and CommonJS.
 ## Sending
 
 ```ts
-import { createRelayo } from '@alimzen/core';
-import { ses } from '@alimzen/ses';
+import { createRelayo } from '@alimzen/relayo';
+import { ses } from '@alimzen/relayo-ses';
 
 const relayo = createRelayo({ email: ses({ region: 'us-east-1' }) });
 
@@ -88,7 +88,7 @@ payload and emits the events. Signed webhooks need the **raw body**, exactly as 
 
 ```ts
 import express from 'express';
-import { ValidationError, WebhookVerificationError } from '@alimzen/core';
+import { ValidationError, WebhookVerificationError } from '@alimzen/relayo';
 
 app.post('/webhooks/:provider', express.text({ type: '*/*' }), async (req, res) => {
   try {
@@ -107,7 +107,7 @@ app.post('/webhooks/:provider', express.text({ type: '*/*' }), async (req, res) 
 });
 ```
 
-Using NestJS? [`@alimzen/nestjs`](../nestjs) ships this controller.
+Using NestJS? [`@alimzen/relayo-nestjs`](../nestjs) ships this controller.
 
 ## Errors
 
@@ -163,7 +163,7 @@ The mailbox provider then POSTs `List-Unsubscribe=One-Click` to that url when th
 ## Failover
 
 ```ts
-import { failover } from '@alimzen/core';
+import { failover } from '@alimzen/relayo';
 
 const relayo = createRelayo({
   email: failover([ses({ region: 'us-east-1' }), smtp(process.env.SMTP_URL!)], {
@@ -189,7 +189,7 @@ const relayo = createRelayo({
 provider:
 
 ```ts
-import { createRelayo, memory, RateLimitError } from '@alimzen/core';
+import { createRelayo, memory, RateLimitError } from '@alimzen/relayo';
 
 const driver = memory();
 const relayo = createRelayo({ email: driver });
@@ -211,4 +211,4 @@ A driver implements `Driver<M>`: `name`, `channel`, `capabilities`, and
 `send(message, { messageId })`. Optional: `sendBatch`, `verifyWebhook`, `parseWebhook`. Attach the
 `messageId` to the provider message (tag, header, custom argument) so webhooks can be mapped back, map
 provider errors to `RelayoError` subclasses, and use `classifyBounce({ smtpCode, enhancedCode, diagnostic })`
-to classify bounces, refined with whatever the provider adds. Declare `@alimzen/core` as a peer dependency.
+to classify bounces, refined with whatever the provider adds. Declare `@alimzen/relayo` as a peer dependency.

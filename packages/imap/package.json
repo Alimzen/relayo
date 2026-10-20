@@ -1,5 +1,5 @@
 {
-  "name": "@alimzen/imap",
+  "name": "@alimzen/relayo-imap",
   "version": "0.1.0",
   "description": "Reads a bounce mailbox over IMAP and turns bounce reports and spam complaints into Relayo events.",
   "license": "MIT",
@@ -53,10 +53,10 @@
     "email"
   ],
   "peerDependencies": {
-    "@alimzen/core": ">=0.1.0 <1.0.0"
+    "@alimzen/relayo": ">=0.1.0 <1.0.0"
   },
   "devDependencies": {
-    "@alimzen/core": "workspace:^",
+    "@alimzen/relayo": "workspace:^",
     "hoodiecrow-imap": "^3.3.1"
   },
   "publishConfig": {
@@ -76,7 +76,7 @@
     }
   },
   "dependencies": {
-    "@alimzen/bounces": "workspace:^",
+    "@alimzen/relayo-bounces": "workspace:^",
     "imapflow": "^2.5.4"
   }
 }

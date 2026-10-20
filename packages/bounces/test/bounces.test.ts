@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs';
-import { createRelayo, memory, type BounceEvent } from '@alimzen/core';
+import { createRelayo, memory, type BounceEvent } from '@alimzen/relayo';
 import { describe, expect, it, vi } from 'vitest';
 import { parseBounceEmail } from '../src/index.js';
 

@@ -5,7 +5,7 @@ import {
   type EventType,
   type RejectEvent,
   type RelayoEvent,
-} from '@alimzen/core';
+} from '@alimzen/relayo';
 
 /** Header and tag the driver sets on every message so events can be mapped back. */
 export const MESSAGE_ID_HEADER = 'X-Relayo-Message-ID';

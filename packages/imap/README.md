@@ -1,19 +1,19 @@
-# @alimzen/imap
+# @alimzen/relayo-imap
 
 Reads your bounce mailbox over IMAP and turns bounce reports and spam complaints into [Relayo](../core)
-events, using [`@alimzen/bounces`](../bounces). The missing piece when you send through your own mail
-server with [`@alimzen/smtp`](../smtp): bounces arrive as email, and this reads them for you.
+events, using [`@alimzen/relayo-bounces`](../bounces). The missing piece when you send through your own mail
+server with [`@alimzen/relayo-smtp`](../smtp): bounces arrive as email, and this reads them for you.
 
 ```sh
-npm install @alimzen/core @alimzen/smtp @alimzen/imap
+npm install @alimzen/relayo @alimzen/relayo-smtp @alimzen/relayo-imap
 ```
 
 ## Usage
 
 ```ts
-import { createRelayo } from '@alimzen/core';
-import { bounceMailbox } from '@alimzen/imap';
-import { smtp } from '@alimzen/smtp';
+import { createRelayo } from '@alimzen/relayo';
+import { bounceMailbox } from '@alimzen/relayo-imap';
+import { smtp } from '@alimzen/relayo-smtp';
 
 const relayo = createRelayo({
   email: smtp(process.env.SMTP_URL!, { bounceAddress: 'bounces@example.com' }),

@@ -1,4 +1,4 @@
-# @alimzen/simulator
+# @alimzen/relayo-simulator
 
 Driver for **Relayo Sim**, the delivery simulator. Swap it in for your real provider in tests and CI, send
 to scenario addresses, and the simulator answers like the real world: hard bounces, greylisting, blocklists,
@@ -6,14 +6,14 @@ full mailboxes, complaints, delays... delivered to your webhook as ordinary Rela
 `relayo.on(...)` handlers run exactly as they would in production.
 
 ```sh
-npm install -D @alimzen/core @alimzen/simulator
+npm install -D @alimzen/relayo @alimzen/relayo-simulator
 ```
 
 ## Usage
 
 ```ts
-import { createRelayo } from '@alimzen/core';
-import { scenarioAddress, simulator } from '@alimzen/simulator';
+import { createRelayo } from '@alimzen/relayo';
+import { scenarioAddress, simulator } from '@alimzen/relayo-simulator';
 
 const relayo = createRelayo({
   email: process.env.CI
@@ -56,10 +56,10 @@ with an `X-Sim-Scenario` header that applies to every recipient. Any other addre
 | `suppressed` | `rejected` / `suppressed`, never attempted |
 
 The simulator also has an SMTP endpoint (password: your API key), so apps sending through
-`@alimzen/smtp`, or any other language, get the same scenarios as live SMTP answers.
+`@alimzen/relayo-smtp`, or any other language, get the same scenarios as live SMTP answers.
 
 Over SMTP, refusing scenarios answer during the session. Add `+async` (`hard-bounce+async@`) to have the
 simulator accept the message and bounce it later, mailing a DSN to the envelope sender, as a relay would: that
-is how you test reading your bounce mailbox with [`@alimzen/imap`](../imap). Complaints come back as ARF reports.
+is how you test reading your bounce mailbox with [`@alimzen/relayo-imap`](../imap). Complaints come back as ARF reports.
 
 `baseUrl` is required: the driver never sends your API key to a default host.

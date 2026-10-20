@@ -1,10 +1,10 @@
-# @alimzen/cli
+# @alimzen/relayo-cli
 
 The `relayo` command, for [Relayo Sim](https://github.com/Alimzen/relayo/tree/main/packages/simulator), the email delivery simulator: send test emails, read their timelines, and **wait in CI for the bounce, complaint or delivery your code must handle**.
 
 ```sh
-npm install --save-dev @alimzen/cli   # then: npx relayo --help
-npx @alimzen/cli --help                # or run it without installing
+npm install --save-dev @alimzen/relayo-cli   # then: npx relayo --help
+npx @alimzen/relayo-cli --help                # or run it without installing
 ```
 
 Node 20+. No dependencies.
@@ -16,7 +16,7 @@ Node 20+. No dependencies.
 | `--url` | `RELAYO_SIM_URL` | Base URL of Relayo Sim |
 | `--api-key` | `RELAYO_SIM_API_KEY` | API key of a project |
 
-These are the same variables the [`@alimzen/simulator`](https://www.npmjs.com/package/@alimzen/simulator) driver documents, so one set of variables serves your app and the CLI.
+These are the same variables the [`@alimzen/relayo-simulator`](https://www.npmjs.com/package/@alimzen/relayo-simulator) driver documents, so one set of variables serves your app and the CLI.
 
 ## Commands
 
@@ -36,7 +36,7 @@ Exit codes: `0` ok, `1` an expectation was not met (`wait` timed out), `2` wrong
 
 ## In CI
 
-Your test suite sends email to the simulator (through `@alimzen/simulator` or SMTP) and then asserts the outcome:
+Your test suite sends email to the simulator (through `@alimzen/relayo-simulator` or SMTP) and then asserts the outcome:
 
 ```sh
 id=$(relayo send --to hard-bounce@sim.relayo.dev --subject "Welcome")
@@ -48,7 +48,7 @@ On GitHub, the [Relayo Sim action](https://github.com/Alimzen/relayo/tree/main/a
 ## Programmatic use
 
 ```ts
-import { run, SimClient } from '@alimzen/cli';
+import { run, SimClient } from '@alimzen/relayo-cli';
 
 const sim = new SimClient(process.env.RELAYO_SIM_URL!, process.env.RELAYO_SIM_API_KEY!);
 const message = await sim.message('sim_8c1…');

@@ -10,7 +10,7 @@ import {
   UnauthorizedException,
   type Type,
 } from '@nestjs/common';
-import { ValidationError, WebhookVerificationError, type Channel, type Relayo, type WebhookRequest } from '@alimzen/core';
+import { ValidationError, WebhookVerificationError, type Channel, type Relayo, type WebhookRequest } from '@alimzen/relayo';
 import { RELAYO_CLIENT } from './constants.js';
 
 const CHANNELS: ReadonlySet<string> = new Set<Channel>(['email', 'sms']);

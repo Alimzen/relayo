@@ -26,7 +26,7 @@ importers:
 
   packages/bounces:
     devDependencies:
-      '@alimzen/core':
+      '@alimzen/relayo':
         specifier: workspace:^
         version: link:../core
 
@@ -36,14 +36,14 @@ importers:
 
   packages/imap:
     dependencies:
-      '@alimzen/bounces':
+      '@alimzen/relayo-bounces':
         specifier: workspace:^
         version: link:../bounces
       imapflow:
         specifier: ^2.5.4
         version: 2.5.4
     devDependencies:
-      '@alimzen/core':
+      '@alimzen/relayo':
         specifier: workspace:^
         version: link:../core
       hoodiecrow-imap:
@@ -52,16 +52,16 @@ importers:
 
   packages/mailgun:
     devDependencies:
-      '@alimzen/core':
+      '@alimzen/relayo':
         specifier: workspace:^
         version: link:../core
 
   packages/nestjs:
     devDependencies:
-      '@alimzen/core':
+      '@alimzen/relayo':
         specifier: workspace:^
         version: link:../core
-      '@alimzen/sendgrid':
+      '@alimzen/relayo-sendgrid':
         specifier: workspace:^
         version: link:../sendgrid
       '@nestjs/common':
@@ -88,19 +88,19 @@ importers:
 
   packages/postmark:
     devDependencies:
-      '@alimzen/core':
+      '@alimzen/relayo':
         specifier: workspace:^
         version: link:../core
 
   packages/resend:
     devDependencies:
-      '@alimzen/core':
+      '@alimzen/relayo':
         specifier: workspace:^
         version: link:../core
 
   packages/sendgrid:
     devDependencies:
-      '@alimzen/core':
+      '@alimzen/relayo':
         specifier: workspace:^
         version: link:../core
 
@@ -110,13 +110,13 @@ importers:
         specifier: ^3.1152.0
         version: 3.1152.0
     devDependencies:
-      '@alimzen/core':
+      '@alimzen/relayo':
         specifier: workspace:^
         version: link:../core
 
   packages/simulator:
     devDependencies:
-      '@alimzen/core':
+      '@alimzen/relayo':
         specifier: workspace:^
         version: link:../core
 
@@ -126,7 +126,7 @@ importers:
         specifier: ^10.1.2
         version: 10.1.2
     devDependencies:
-      '@alimzen/core':
+      '@alimzen/relayo':
         specifier: workspace:^
         version: link:../core
       '@types/smtp-server':

@@ -1,5 +1,5 @@
 {
-  "name": "@alimzen/simulator",
+  "name": "@alimzen/relayo-simulator",
   "version": "0.1.1",
   "description": "Relayo Sim driver: send to the delivery simulator and get realistic bounces, deferrals, complaints and more as Relayo events.",
   "license": "MIT",
@@ -53,10 +53,10 @@
     "ci"
   ],
   "peerDependencies": {
-    "@alimzen/core": ">=0.1.0 <1.0.0"
+    "@alimzen/relayo": ">=0.1.0 <1.0.0"
   },
   "devDependencies": {
-    "@alimzen/core": "workspace:^"
+    "@alimzen/relayo": "workspace:^"
   },
   "publishConfig": {
     "access": "public",

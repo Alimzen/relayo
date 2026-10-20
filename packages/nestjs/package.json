@@ -1,5 +1,5 @@
 {
-  "name": "@alimzen/nestjs",
+  "name": "@alimzen/relayo-nestjs",
   "version": "0.1.0",
   "description": "NestJS module for Relayo: RelayoModule, an injectable RelayoService, @OnRelayoEvent handlers and an optional webhook controller.",
   "license": "MIT",
@@ -55,7 +55,7 @@
   "peerDependencies": {
     "@nestjs/common": "^11.0.0 || ^12.0.0",
     "@nestjs/core": "^11.0.0 || ^12.0.0",
-    "@alimzen/core": ">=0.1.0 <1.0.0",
+    "@alimzen/relayo": ">=0.1.0 <1.0.0",
     "reflect-metadata": "^0.1.13 || ^0.2.0"
   },
   "devDependencies": {
@@ -64,8 +64,8 @@
     "@nestjs/platform-express": "^12",
     "@nestjs/platform-fastify": "^12",
     "@nestjs/testing": "^12",
-    "@alimzen/core": "workspace:^",
-    "@alimzen/sendgrid": "workspace:^",
+    "@alimzen/relayo": "workspace:^",
+    "@alimzen/relayo-sendgrid": "workspace:^",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2"
   },

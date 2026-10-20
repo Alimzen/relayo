@@ -10,7 +10,7 @@ import {
   type RelayoEvent,
   type SendResult,
   type WebhookRequest,
-} from '@alimzen/core';
+} from '@alimzen/relayo';
 
 export const SIGNATURE_HEADER = 'relayo-signature';
 export const DEFAULT_DOMAIN = 'sim.relayo.dev';

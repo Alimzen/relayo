@@ -1,4 +1,4 @@
-import type { EventType } from '@alimzen/core';
+import type { EventType } from '@alimzen/relayo';
 import { RELAYO_EVENT_METADATA } from './constants.js';
 
 export type RelayoEventSelector = EventType | '*';

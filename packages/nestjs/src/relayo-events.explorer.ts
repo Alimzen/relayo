@@ -1,6 +1,6 @@
 import { Inject, Injectable, Logger, type OnApplicationBootstrap, type OnModuleDestroy } from '@nestjs/common';
 import { DiscoveryService, MetadataScanner } from '@nestjs/core';
-import type { Relayo, RelayoEvent } from '@alimzen/core';
+import type { Relayo, RelayoEvent } from '@alimzen/relayo';
 import { RELAYO_CLIENT, RELAYO_EVENT_METADATA } from './constants.js';
 import type { RelayoEventSelector } from './on-relayo-event.decorator.js';
 

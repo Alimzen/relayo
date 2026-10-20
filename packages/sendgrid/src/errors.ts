@@ -4,7 +4,7 @@ import {
   RateLimitError,
   ValidationError,
   type RelayoError,
-} from '@alimzen/core';
+} from '@alimzen/relayo';
 
 /** What SendGrid answered, kept in `RelayoError.raw`. */
 export interface SendGridErrorDetails {

@@ -1,17 +1,17 @@
-# @alimzen/mailgun
+# @alimzen/relayo-mailgun
 
 [Mailgun](https://www.mailgun.com) driver for [Relayo](../core): sends through the Mailgun API and turns its
 signed webhooks into Relayo events. No SDK, no runtime dependencies.
 
 ```sh
-npm install @alimzen/core @alimzen/mailgun
+npm install @alimzen/relayo @alimzen/relayo-mailgun
 ```
 
 ## Sending
 
 ```ts
-import { createRelayo } from '@alimzen/core';
-import { mailgun } from '@alimzen/mailgun';
+import { createRelayo } from '@alimzen/relayo';
+import { mailgun } from '@alimzen/relayo-mailgun';
 
 const relayo = createRelayo({
   email: mailgun({

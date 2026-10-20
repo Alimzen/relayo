@@ -1,5 +1,5 @@
 {
-  "name": "@alimzen/sendgrid",
+  "name": "@alimzen/relayo-sendgrid",
   "version": "0.1.0",
   "description": "SendGrid driver for Relayo: sending through the v3 API and normalized events from the signed Event Webhook.",
   "license": "MIT",
@@ -53,10 +53,10 @@
     "webhooks"
   ],
   "peerDependencies": {
-    "@alimzen/core": ">=0.1.0 <1.0.0"
+    "@alimzen/relayo": ">=0.1.0 <1.0.0"
   },
   "devDependencies": {
-    "@alimzen/core": "workspace:^"
+    "@alimzen/relayo": "workspace:^"
   },
   "publishConfig": {
     "access": "public",

@@ -1,17 +1,17 @@
-# @alimzen/resend
+# @alimzen/relayo-resend
 
 [Resend](https://resend.com) driver for [Relayo](../core): sends through the Resend API and turns its signed
 webhooks into Relayo events. No SDK, no runtime dependencies.
 
 ```sh
-npm install @alimzen/core @alimzen/resend
+npm install @alimzen/relayo @alimzen/relayo-resend
 ```
 
 ## Sending
 
 ```ts
-import { createRelayo } from '@alimzen/core';
-import { resend } from '@alimzen/resend';
+import { createRelayo } from '@alimzen/relayo';
+import { resend } from '@alimzen/relayo-resend';
 
 const relayo = createRelayo({
   email: resend({ apiKey: process.env.RESEND_API_KEY!, webhook: { secret: process.env.RESEND_WEBHOOK_SECRET! } }),

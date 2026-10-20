@@ -6,7 +6,7 @@ import {
   RateLimitError,
   ValidationError,
   type EmailMessage,
-} from '@alimzen/core';
+} from '@alimzen/relayo';
 import { describe, expect, it, vi } from 'vitest';
 import { resend, toResendRequest } from '../src/index.js';
 import fixtures from './fixtures/events.json';

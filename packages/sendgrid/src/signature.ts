@@ -1,5 +1,5 @@
 import { createPublicKey, verify, type KeyObject } from 'node:crypto';
-import type { WebhookRequest } from '@alimzen/core';
+import type { WebhookRequest } from '@alimzen/relayo';
 
 export const SIGNATURE_HEADER = 'x-twilio-email-event-webhook-signature';
 export const TIMESTAMP_HEADER = 'x-twilio-email-event-webhook-timestamp';

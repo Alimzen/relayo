@@ -1,5 +1,5 @@
 {
-  "name": "@alimzen/postmark",
+  "name": "@alimzen/relayo-postmark",
   "version": "0.1.0",
   "description": "Postmark driver for Relayo: sending through the Postmark API and normalized events from its webhooks.",
   "license": "MIT",
@@ -52,10 +52,10 @@
     "webhooks"
   ],
   "peerDependencies": {
-    "@alimzen/core": ">=0.1.0 <1.0.0"
+    "@alimzen/relayo": ">=0.1.0 <1.0.0"
   },
   "devDependencies": {
-    "@alimzen/core": "workspace:^"
+    "@alimzen/relayo": "workspace:^"
   },
   "publishConfig": {
     "access": "public",

@@ -4,7 +4,7 @@ import {
   type BounceEvent,
   type EventType,
   type RelayoEvent,
-} from '@alimzen/core';
+} from '@alimzen/relayo';
 import { findPart, parseHeaderBlock, parseMessage, type Headers, type MimePart } from './mime.js';
 
 /** What kind of email was parsed. Only `dsn`, `arf` and `non-standard` produce events. */

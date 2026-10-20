@@ -7,7 +7,7 @@ import {
   RejectedError,
   ValidationError,
   type EmailMessage,
-} from '@alimzen/core';
+} from '@alimzen/relayo';
 import { SMTPServer, type SMTPServerOptions } from 'smtp-server';
 import { afterEach, describe, expect, it } from 'vitest';
 import { MESSAGE_ID_HEADER, METADATA_HEADER, smtp, toMailOptions, toRelayoError } from '../src/index.js';

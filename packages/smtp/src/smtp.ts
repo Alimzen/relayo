@@ -1,4 +1,4 @@
-import type { Driver, EmailMessage, Recipient, SendContext, SendResult } from '@alimzen/core';
+import type { Driver, EmailMessage, Recipient, SendContext, SendResult } from '@alimzen/relayo';
 import nodemailer, {
   type Address,
   type Attachment,
@@ -25,13 +25,13 @@ export interface SmtpDriverOptions {
   name?: string;
   /**
    * Send `metadata` in the `X-Relayo-Metadata` header, so bounce reports quoting the original headers
-   * bring it back (see `@alimzen/bounces`). Recipients can see headers: turn it off for sensitive
+   * bring it back (see `@alimzen/relayo-bounces`). Recipients can see headers: turn it off for sensitive
    * metadata. Default true.
    */
   metadataHeader?: boolean;
   /**
    * Envelope sender (`MAIL FROM`, the Return-Path) for every message: where receiving servers send bounce
-   * reports. Defaults to the `from` address. Point it at a mailbox you read with `@alimzen/bounces`.
+   * reports. Defaults to the `from` address. Point it at a mailbox you read with `@alimzen/relayo-bounces`.
    */
   bounceAddress?: string;
 }

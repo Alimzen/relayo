@@ -1,5 +1,5 @@
 import { createHmac } from 'node:crypto';
-import { AuthenticationError, createRelayo, ProviderUnavailableError, ValidationError } from '@alimzen/core';
+import { AuthenticationError, createRelayo, ProviderUnavailableError, ValidationError } from '@alimzen/relayo';
 import { describe, expect, it, vi } from 'vitest';
 import { scenarioAddress, simulator } from '../src/index.js';
 

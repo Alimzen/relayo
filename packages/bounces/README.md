@@ -1,4 +1,4 @@
-# @alimzen/bounces
+# @alimzen/relayo-bounces
 
 Reads the emails that come back to your bounce address and turns them into [Relayo](../core) events:
 
@@ -9,16 +9,16 @@ Reads the emails that come back to your bounce address and turns them into [Rela
 - **Out-of-office and other auto-replies** are recognized and ignored.
 
 This is what gives you bounce events when you send through your own mail server with
-[`@alimzen/smtp`](../smtp): SMTP has no webhooks, so bounces arrive as email. No runtime dependencies.
+[`@alimzen/relayo-smtp`](../smtp): SMTP has no webhooks, so bounces arrive as email. No runtime dependencies.
 
 ```sh
-npm install @alimzen/core @alimzen/bounces
+npm install @alimzen/relayo @alimzen/relayo-bounces
 ```
 
 ## Usage
 
 ```ts
-import { parseBounceEmail } from '@alimzen/bounces';
+import { parseBounceEmail } from '@alimzen/relayo-bounces';
 
 // rawEmail: the full message as received (string or bytes), e.g. from IMAP, an inbound-email
 // webhook (SES, Mailgun, Postmark...) or a file.
@@ -38,12 +38,12 @@ Pass `{ provider: 'mailserver' }` if your SMTP driver uses a name other than `"s
 
 ## Matching reports to your sends
 
-Most reports quote the original message's headers. `@alimzen/smtp` sends `X-Relayo-Message-ID`,
+Most reports quote the original message's headers. `@alimzen/relayo-smtp` sends `X-Relayo-Message-ID`,
 `X-Relayo-Metadata` and `Message-ID: <relayo-id@your-domain>`, so events come back with your `messageId`
 and `metadata`. If a report only quotes the `Message-ID`, the id is recovered from it. Some feedback loops
 redact the recipient: those complaints have `recipient: ''`, but still the `messageId`.
 
-To read the mailbox automatically, use [`@alimzen/imap`](../imap).
+To read the mailbox automatically, use [`@alimzen/relayo-imap`](../imap).
 
 ## Where bounces go
 

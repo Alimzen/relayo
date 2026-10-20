@@ -19,7 +19,7 @@ import {
   type SendContext,
   type SendResult,
   type WebhookRequest,
-} from '@alimzen/core';
+} from '@alimzen/relayo';
 
 export const MESSAGE_ID_KEY = 'relayo_message_id';
 const SMTP_CODE = /\b([245]\d\d)\b/;

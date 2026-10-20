@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import type { AddressInfo } from 'node:net';
-import { AuthenticationError, ProviderUnavailableError, type RelayoEvent } from '@alimzen/core';
+import { AuthenticationError, ProviderUnavailableError, type RelayoEvent } from '@alimzen/relayo';
 import hoodiecrow from 'hoodiecrow-imap';
 import { ImapFlow } from 'imapflow';
 import { afterEach, describe, expect, it, vi } from 'vitest';

@@ -6,7 +6,7 @@ import {
   RejectedError,
   ValidationError,
   type EmailMessage,
-} from '@alimzen/core';
+} from '@alimzen/relayo';
 import { describe, expect, it, vi } from 'vitest';
 import { postmark, toPostmarkRequest } from '../src/index.js';
 import fixtures from './fixtures/events.json';

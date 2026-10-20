@@ -1,5 +1,5 @@
 import { createPublicKey, verify, X509Certificate, type KeyObject } from 'node:crypto';
-import type { WebhookRequest } from '@alimzen/core';
+import type { WebhookRequest } from '@alimzen/relayo';
 
 /** An Amazon SNS HTTP(S) message. */
 export interface SnsMessage {

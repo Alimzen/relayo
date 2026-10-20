@@ -1,5 +1,5 @@
 {
-  "name": "@alimzen/resend",
+  "name": "@alimzen/relayo-resend",
   "version": "0.1.0",
   "description": "Resend driver for Relayo: sending through the Resend API and normalized events from its signed webhooks.",
   "license": "MIT",
@@ -52,10 +52,10 @@
     "webhooks"
   ],
   "peerDependencies": {
-    "@alimzen/core": ">=0.1.0 <1.0.0"
+    "@alimzen/relayo": ">=0.1.0 <1.0.0"
   },
   "devDependencies": {
-    "@alimzen/core": "workspace:^"
+    "@alimzen/relayo": "workspace:^"
   },
   "publishConfig": {
     "access": "public",

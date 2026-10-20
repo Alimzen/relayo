@@ -1,4 +1,4 @@
-# @alimzen/sendgrid
+# @alimzen/relayo-sendgrid
 
 ## 0.1.0
 

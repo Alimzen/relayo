@@ -1,4 +1,4 @@
-# @alimzen/ses
+# @alimzen/relayo-ses
 
 ## 0.1.0
 

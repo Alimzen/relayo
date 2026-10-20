@@ -1,17 +1,17 @@
-# @alimzen/postmark
+# @alimzen/relayo-postmark
 
 [Postmark](https://postmarkapp.com) driver for [Relayo](../core): sends through the Postmark API and turns its
 webhooks into Relayo events. No SDK, no runtime dependencies.
 
 ```sh
-npm install @alimzen/core @alimzen/postmark
+npm install @alimzen/relayo @alimzen/relayo-postmark
 ```
 
 ## Sending
 
 ```ts
-import { createRelayo } from '@alimzen/core';
-import { postmark } from '@alimzen/postmark';
+import { createRelayo } from '@alimzen/relayo';
+import { postmark } from '@alimzen/relayo-postmark';
 
 const relayo = createRelayo({
   email: postmark({

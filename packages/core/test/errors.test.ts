@@ -8,7 +8,7 @@ import {
   WebhookVerificationError,
 } from '../src/index.js';
 
-/** What an error thrown by another copy of @alimzen/core looks like from here: same brand and shape, other class. */
+/** What an error thrown by another copy of @alimzen/relayo looks like from here: same brand and shape, other class. */
 function foreignError(code: string, retryable: boolean) {
   const error = Object.assign(new Error('from another copy'), { code, retryable });
   Object.defineProperty(error, Symbol.for('@alimzen/core:error'), { value: true });

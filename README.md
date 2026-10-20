@@ -9,9 +9,9 @@ has real costs, like marking good contacts invalid because your own IP got block
 Relayo gives you one API to send, and one set of events to react to, whatever provider is underneath.
 
 ```ts
-import { createRelayo, failover } from '@alimzen/core';
-import { ses } from '@alimzen/ses';
-import { sendgrid } from '@alimzen/sendgrid';
+import { createRelayo, failover } from '@alimzen/relayo';
+import { ses } from '@alimzen/relayo-ses';
+import { sendgrid } from '@alimzen/relayo-sendgrid';
 
 const relayo = createRelayo({
   email: failover([ses({ region: 'us-east-1' }), sendgrid({ apiKey: process.env.SENDGRID_API_KEY! })]),
@@ -33,23 +33,25 @@ relayo.on('bounced', (event) => {
 ```
 
 > **Status:** pre-release (0.x). APIs may still change.
+>
+> **Renamed:** the packages used to be `@alimzen/core`, `@alimzen/smtp`, `@alimzen/ses`… They are now `@alimzen/relayo` and `@alimzen/relayo-*` (same code and versions). Replace the names in your `package.json` and imports; the old packages are deprecated.
 
 ## Packages
 
 | Package | What it does |
 | --- | --- |
-| [`@alimzen/core`](packages/core) | `createRelayo`, message/event/error contracts, `failover()`, `classifyBounce`, in-memory test driver |
-| [`@alimzen/smtp`](packages/smtp) | Any SMTP server, built on Nodemailer |
-| [`@alimzen/ses`](packages/ses) | Amazon SES (v2 API), events through SNS with signature verification |
-| [`@alimzen/sendgrid`](packages/sendgrid) | SendGrid v3 API, signed Event Webhook |
-| [`@alimzen/resend`](packages/resend) | Resend API, Svix-signed webhooks, idempotency keys |
-| [`@alimzen/postmark`](packages/postmark) | Postmark API, webhooks with basic auth |
-| [`@alimzen/mailgun`](packages/mailgun) | Mailgun API (US and EU), signed webhooks |
-| [`@alimzen/simulator`](packages/simulator) | Relayo Sim driver: realistic bounces, greylisting, complaints and more, for tests and CI |
-| [`@alimzen/bounces`](packages/bounces) | Bounce reports (DSN) and spam complaints (ARF) received by email, for your own mail server |
-| [`@alimzen/imap`](packages/imap) | Reads the bounce mailbox over IMAP and emits those events |
-| [`@alimzen/nestjs`](packages/nestjs) | `RelayoModule`, injectable `RelayoService`, `@OnRelayoEvent()`, webhook controller |
-| [`@alimzen/cli`](packages/cli) | The `relayo` command for Relayo Sim: send, inspect, and wait for bounces or deliveries in CI |
+| [`@alimzen/relayo`](packages/core) | `createRelayo`, message/event/error contracts, `failover()`, `classifyBounce`, in-memory test driver |
+| [`@alimzen/relayo-smtp`](packages/smtp) | Any SMTP server, built on Nodemailer |
+| [`@alimzen/relayo-ses`](packages/ses) | Amazon SES (v2 API), events through SNS with signature verification |
+| [`@alimzen/relayo-sendgrid`](packages/sendgrid) | SendGrid v3 API, signed Event Webhook |
+| [`@alimzen/relayo-resend`](packages/resend) | Resend API, Svix-signed webhooks, idempotency keys |
+| [`@alimzen/relayo-postmark`](packages/postmark) | Postmark API, webhooks with basic auth |
+| [`@alimzen/relayo-mailgun`](packages/mailgun) | Mailgun API (US and EU), signed webhooks |
+| [`@alimzen/relayo-simulator`](packages/simulator) | Relayo Sim driver: realistic bounces, greylisting, complaints and more, for tests and CI |
+| [`@alimzen/relayo-bounces`](packages/bounces) | Bounce reports (DSN) and spam complaints (ARF) received by email, for your own mail server |
+| [`@alimzen/relayo-imap`](packages/imap) | Reads the bounce mailbox over IMAP and emits those events |
+| [`@alimzen/relayo-nestjs`](packages/nestjs) | `RelayoModule`, injectable `RelayoService`, `@OnRelayoEvent()`, webhook controller |
+| [`@alimzen/relayo-cli`](packages/cli) | The `relayo` command for Relayo Sim: send, inspect, and wait for bounces or deliveries in CI |
 
 In CI on GitHub, the [Relayo Sim action](actions/sim) points your tests at the simulator and summarizes every email
 the job sent.

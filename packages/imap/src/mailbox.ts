@@ -1,5 +1,5 @@
-import { parseBounceEmail, type BounceEmailKind } from '@alimzen/bounces';
-import { AuthenticationError, ProviderUnavailableError, type RelayoError, type RelayoEvent } from '@alimzen/core';
+import { parseBounceEmail, type BounceEmailKind } from '@alimzen/relayo-bounces';
+import { AuthenticationError, ProviderUnavailableError, type RelayoError, type RelayoEvent } from '@alimzen/relayo';
 import { ImapFlow, type ImapFlowOptions } from 'imapflow';
 
 /** What to do with a message once it has been handled. */

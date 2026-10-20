@@ -1,17 +1,17 @@
-# @alimzen/ses
+# @alimzen/relayo-ses
 
 Amazon SES driver for [Relayo](../core): sends through the SES v2 API and turns SES events delivered by
 Amazon SNS into Relayo events, verifying SNS signatures.
 
 ```sh
-npm install @alimzen/core @alimzen/ses
+npm install @alimzen/relayo @alimzen/relayo-ses
 ```
 
 ## Sending
 
 ```ts
-import { createRelayo } from '@alimzen/core';
-import { ses } from '@alimzen/ses';
+import { createRelayo } from '@alimzen/relayo';
+import { ses } from '@alimzen/relayo-ses';
 
 const relayo = createRelayo({
   email: ses({
