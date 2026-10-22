@@ -32,6 +32,16 @@ importers:
 
   packages/cli: {}
 
+  packages/cloud:
+    dependencies:
+      '@alimzen/relayo-simulator':
+        specifier: workspace:^
+        version: link:../simulator
+    devDependencies:
+      '@alimzen/relayo':
+        specifier: workspace:^
+        version: link:../core
+
   packages/core: {}
 
   packages/imap:
