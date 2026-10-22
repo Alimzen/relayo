@@ -2,7 +2,7 @@
 
 Librería open source para enviar email/SMS de forma agnóstica del proveedor y **normalizar los eventos de vuelta** (rebotes, quejas, bajas…), más un simulador de entrega de pago (Relayo Sim). No es un CRM.
 
-Contexto completo, roadmap, contratos y ADRs: [docs/contexto.md](docs/contexto.md). Estado: fases 0, 1 y 2 hechas (Relayo Sim en el repo privado `relayo-sim`); fase 3 en curso (falta dominio y despliegue, freemium y beta).
+Contexto completo, roadmap, contratos y ADRs: [docs/contexto.md](docs/contexto.md). Estado: fases 0, 1 y 2 hechas (Relayo Sim en el repo privado `relayo-sim`); fase 3 casi hecha (desplegado en relayo.alimzen.com; falta la beta). La plataforma también es proveedor: claves `rly_live_` que entregan por las conexiones del proyecto (email y SMS por Twilio) o por el envío propio de Relayo; en la librería, `packages/cloud` → `@alimzen/relayo-cloud`, y `packages/twilio` → `@alimzen/relayo-twilio` (id de Relayo en el `StatusCallback`, firma `X-Twilio-Signature` sobre la URL: los webhooks necesitan `req.url`).
 
 ## Repo
 
