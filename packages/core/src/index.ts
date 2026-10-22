@@ -1,5 +1,14 @@
 export { createRelayo } from './relayo.js';
-export type { ChannelClient, EventHandler, Relayo, RelayoConfig } from './relayo.js';
+export type {
+  ChannelClient,
+  EventHandler,
+  Relayo,
+  RelayoAccount,
+  RelayoChannels,
+  RelayoConfig,
+  SendManyOptions,
+  SendOutcome,
+} from './relayo.js';
 
 export {
   AuthenticationError,

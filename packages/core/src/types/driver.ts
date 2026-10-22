@@ -37,6 +37,8 @@ export interface WebhookRequest {
    * Required to route webhooks reliably when the channel uses `failover()`.
    */
   provider?: string;
+  /** Name of the account (`config.accounts`) the webhook belongs to; the default account when absent. */
+  account?: string;
 }
 
 export interface Driver<M extends BaseMessage = BaseMessage> {

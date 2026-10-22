@@ -45,9 +45,51 @@ next to your record if you want to match events by id; `metadata` usually does t
 | `tags` | Provider tags/categories, where supported |
 | `providerOptions` | Escape hatch: merged into the provider request as-is |
 
-`relayo.email.sendBatch(messages)` validates every message before sending any, then sends them
-concurrently (or with the provider's batch API when the driver has one). SMS works the same way through
-`relayo.sms.send({ to, body })`.
+SMS works the same way through `relayo.sms.send({ to, body })`.
+
+### Many messages
+
+`sendMany` sends a list, a few at a time, and tells you what happened to each one. It never rejects
+because one message failed: a bad address or a provider error affects only that message.
+
+```ts
+const outcomes = await relayo.email.sendMany(
+  customers.map((c) => ({ from, to: { address: c.email }, subject: 'Your October invoice', html: invoiceHtml(c), metadata: { customerId: c.id } })),
+  { concurrency: 5 }, // default 10
+);
+for (const [i, outcome] of outcomes.entries()) {
+  if (outcome.ok) await saveMessageId(customers[i], outcome.messageId);
+  else console.error(customers[i].email, outcome.error.message); // a RelayoError: check error.retryable
+}
+```
+
+One email per recipient is what you usually want for newsletters and notifications: `to: [a, b, c]` sends
+**one** email that every recipient can see. `sendBatch(messages)` is the all-or-nothing variant: it
+validates everything first, uses the provider's batch API when the driver has one, and rejects if any send
+fails.
+
+### Several accounts
+
+One instance can hold several sending accounts: another provider, or the same one with other credentials
+(transactional mail through SES, newsletters through a different SMTP, SMS through another account...).
+
+```ts
+const relayo = createRelayo({
+  email: ses({ region: 'eu-west-1' }), // the default account
+  accounts: {
+    marketing: { email: smtp('smtps://news%40example.com:pass@smtp.example.com') },
+    alerts: { sms: twilio({ accountSid, authToken }) },
+  },
+});
+
+await relayo.email.send(receipt); // default account
+await relayo.account('marketing').email.sendMany(newsletter);
+relayo.accounts; // ['marketing', 'alerts']
+```
+
+Webhooks of a named account go through its driver: `relayo.handleWebhook('email', { ...req, account: 'marketing' })`
+(with the NestJS module, `POST /webhooks/relayo/email?account=marketing`). Their events carry
+`event.account`, so one handler can tell them apart; events of the default account have no `account`.
 
 ## Events
 

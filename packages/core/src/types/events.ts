@@ -23,6 +23,8 @@ export interface RelayoEvent {
   recipient: string;
   timestamp: Date;
   metadata?: Record<string, string>;
+  /** The named account (`config.accounts`) whose webhook produced the event; absent for the default account. */
+  account?: string;
   /** Original provider payload, always present. */
   raw: unknown;
 }

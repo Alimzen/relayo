@@ -7,6 +7,7 @@ import type {
   EventType,
   Channel,
   Relayo,
+  RelayoChannels,
   RelayoEvent,
   SmsMessage,
   WebhookRequest,
@@ -24,6 +25,15 @@ export class RelayoService implements Relayo {
 
   get sms(): ChannelClient<SmsMessage> {
     return this.relayo.sms;
+  }
+
+  /** The clients of a named account from `accounts` in the module options. */
+  account(name: string): RelayoChannels {
+    return this.relayo.account(name);
+  }
+
+  get accounts(): string[] {
+    return this.relayo.accounts;
   }
 
   on<T extends EventType>(type: T, handler: EventHandler<EventOf<T>>): () => void;

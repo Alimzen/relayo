@@ -63,3 +63,33 @@ simulator accept the message and bounce it later, mailing a DSN to the envelope 
 is how you test reading your bounce mailbox with [`@alimzen/relayo-imap`](../imap). Complaints come back as ARF reports.
 
 `baseUrl` is required: the driver never sends your API key to a default host.
+
+## SMS
+
+`simulatorSms()` sends SMS to the simulator (`POST /v1/sms`) and receives their events through the same
+signed webhook. Pick a scenario with the destination number (`scenarioNumber(name)`): they are fictional
+555-01XX numbers, so no real phone ever gets a test message. Any other number is delivered.
+
+```ts
+import { scenarioNumber, simulator, simulatorSms } from '@alimzen/relayo-simulator';
+
+const options = { apiKey: process.env.RELAYO_SIM_API_KEY!, baseUrl: process.env.RELAYO_SIM_URL!, webhook: { secret: process.env.RELAYO_SIM_WEBHOOK_SECRET! } };
+const relayo = createRelayo({ email: simulator(options), sms: simulatorSms(options) });
+
+await relayo.sms.send({ from: 'Acme', to: { address: scenarioNumber('invalid-number') }, body: 'Your code is 482913' });
+// → relayo.on('bounced') gets { channel: 'sms', bounceType: 'hard', reason: 'user_unknown', ... }
+```
+
+| Scenario | Number | What happens |
+| --- | --- | --- |
+| `delivered` | `+12015550100` | Delivered (any other number too) |
+| `invalid-number` | `+12015550101` | `bounced` hard / `user_unknown` (carrier error 30005) |
+| `landline` | `+12015550102` | `bounced` hard: a landline cannot receive SMS (30006) |
+| `unreachable` | `+12015550103` | Deferred twice, then `bounced` soft / `temporary_failure` (30003) |
+| `carrier-filtered` | `+12015550104` | `bounced` block / `content_rejected`: filtered as spam (30007) |
+| `opt-out` | `+12015550105` | Delivered, then `unsubscribed` (the recipient replies STOP) |
+| `suppressed` | `+12015550106` | `rejected` / `suppressed`: replied STOP before, never sent |
+| `delay` | `+12015550107` | Deferred, delivered after 30 seconds |
+
+The webhook is the same for email and SMS; the events say which with `event.channel`. With the NestJS
+module, point the project's webhook at `/webhooks/relayo/email`: the simulator driver verifies both kinds.

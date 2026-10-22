@@ -9,6 +9,7 @@ import {
   type RelayoError,
   type RelayoEvent,
   type SendResult,
+  type SmsMessage,
   type WebhookRequest,
 } from '@alimzen/relayo';
 
@@ -98,7 +99,65 @@ export function simulator(options: SimulatorDriverOptions): Driver<EmailMessage>
       return result;
     },
 
-    verifyWebhook(req) {
+    ...webhookHandlers(name, webhook),
+  };
+}
+
+/**
+ * Relayo Sim driver for SMS: send to scenario numbers (see `scenarioNumber`) and the simulator plays the
+ * scenario back as Relayo events: delivered, bounces (invalid number, landline, unreachable, carrier
+ * filtering), opt-outs (STOP)... Any other number is delivered. Nothing is sent to a real phone.
+ */
+export function simulatorSms(options: SimulatorDriverOptions): Driver<SmsMessage> {
+  if (!options.apiKey) throw new ValidationError('simulatorSms() needs an apiKey');
+  if (!options.baseUrl) throw new ValidationError('simulatorSms() needs the baseUrl of your Relayo Sim');
+  const name = options.name ?? 'simulator';
+  const baseUrl = options.baseUrl.replace(/\/$/, '');
+  const doFetch = options.fetch ?? globalThis.fetch;
+
+  return {
+    name,
+    channel: 'sms',
+    capabilities: { batch: false, attachments: false, scheduling: false, tracking: false, webhooks: true },
+
+    async send(message, context) {
+      const to = (Array.isArray(message.to) ? message.to : [message.to]).map((r) => r.address);
+      const body = {
+        ...(message.from && { from: message.from }),
+        to,
+        body: message.body,
+        ...(message.metadata && { metadata: message.metadata }),
+        ...(message.tags && { tags: message.tags }),
+        relayoMessageId: context.messageId,
+      };
+
+      let response: Response;
+      try {
+        response = await doFetch(`${baseUrl}/v1/sms`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${options.apiKey}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+          signal: AbortSignal.timeout(options.timeoutMs ?? 30_000),
+        });
+      } catch (error) {
+        throw new ProviderUnavailableError(`Relayo Sim request failed: ${(error as Error).message}`, { provider: name, cause: error });
+      }
+      if (!response.ok) throw await errorFromResponse(response, name);
+
+      const { id } = (await response.json()) as { id: string };
+      const result: SendResult = { messageId: context.messageId, provider: name, status: 'queued' };
+      if (id) result.providerMessageId = id;
+      return result;
+    },
+
+    ...webhookHandlers(name, options.webhook ?? {}),
+  };
+}
+
+/** Webhook verification and parsing, the same for email and SMS. */
+function webhookHandlers(name: string, webhook: SimulatorWebhookOptions) {
+  return {
+    verifyWebhook(req: WebhookRequest) {
       if (webhook.verifySignature === false) return true;
       if (!webhook.secret) {
         throw new ValidationError(
@@ -109,7 +168,7 @@ export function simulator(options: SimulatorDriverOptions): Driver<EmailMessage>
       return verifySimulatorSignature(req, webhook.secret, webhook.toleranceSeconds ?? 300);
     },
 
-    parseWebhook(req) {
+    parseWebhook(req: WebhookRequest): RelayoEvent[] {
       const event = readBody(req) as RelayoEvent;
       if (!event || typeof event.type !== 'string' || typeof event.id !== 'string') {
         throw new ValidationError('Unrecognized Relayo Sim webhook payload', { provider: name, raw: event });
@@ -118,6 +177,27 @@ export function simulator(options: SimulatorDriverOptions): Driver<EmailMessage>
       return [{ ...event, timestamp: new Date(event.timestamp) }];
     },
   };
+}
+
+/** SMS scenarios and the numbers that select them (fictional 555-01XX numbers: no real phone gets them). */
+export const SMS_SCENARIO_NUMBERS = {
+  delivered: '+12015550100',
+  'invalid-number': '+12015550101',
+  landline: '+12015550102',
+  unreachable: '+12015550103',
+  'carrier-filtered': '+12015550104',
+  'opt-out': '+12015550105',
+  suppressed: '+12015550106',
+  delay: '+12015550107',
+} as const;
+
+export type SmsScenario = keyof typeof SMS_SCENARIO_NUMBERS;
+
+/** `scenarioNumber('invalid-number')` → `+12015550101`. */
+export function scenarioNumber(scenario: SmsScenario): string {
+  const number = SMS_SCENARIO_NUMBERS[scenario];
+  if (!number) throw new ValidationError(`Unknown SMS scenario "${String(scenario)}"`);
+  return number;
 }
 
 /** `scenarioAddress('greylist', 3)` → `greylist+3@sim.relayo.dev`. */

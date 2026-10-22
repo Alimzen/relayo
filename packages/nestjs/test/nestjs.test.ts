@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import { generateKeyPairSync, sign } from 'node:crypto';
-import { Inject, Injectable, Module, Scope, type INestApplication, type NestApplicationOptions } from '@nestjs/common';
+import { Controller, Inject, Injectable, Module, Scope, type INestApplication, type NestApplicationOptions } from '@nestjs/common';
 import { FastifyAdapter } from '@nestjs/platform-fastify';
 import { Test } from '@nestjs/testing';
 import {
@@ -68,6 +68,16 @@ class RequestScopedHandler {
   }
 }
 
+/** Handlers often live in controllers in Nest apps: they must be found there too. */
+@Controller('billing')
+class BillingController {
+  static bounces: string[] = [];
+  @OnRelayoEvent('bounced')
+  onBounce(event: BounceEvent) {
+    BillingController.bounces.push(event.recipient);
+  }
+}
+
 const apps: INestApplication[] = [];
 afterEach(async () => {
   await Promise.all(apps.splice(0).map((app) => app.close()));
@@ -80,6 +90,7 @@ async function start(
   const moduleRef = await Test.createTestingModule({
     imports: [RelayoModule.forRoot(relayo)],
     providers: [BillingService, FailingHandler, RequestScopedHandler],
+    controllers: [BillingController],
   }).compile();
   const app = fastify
     ? moduleRef.createNestApplication(new FastifyAdapter(), appOptions)
@@ -106,6 +117,15 @@ describe('RelayoModule', () => {
     expect(billing.bounces).toEqual([expect.objectContaining({ messageId, bounceType: 'hard', metadata: { facturaId: '123' } })]);
     expect(billing.all.map((e) => e.type)).toEqual(['bounced', 'delivered']);
     expect(RequestScopedHandler.calls).toBe(0);
+  });
+
+  it('finds @OnRelayoEvent methods on controllers too', async () => {
+    const driver = memory();
+    BillingController.bounces = [];
+    const { app, billing } = await start({ email: driver });
+    const { messageId } = await billing.sendInvoice();
+    await app.get(RelayoService).emit(driver.createEvent(messageId, 'bounced', { bounceType: 'hard', reason: 'user_unknown' }));
+    expect(BillingController.bounces).toEqual(['cliente@empresa.com']);
   });
 
   it('exposes the raw Relayo instance and unsubscribes handlers on shutdown', async () => {
@@ -167,6 +187,18 @@ describe.each([
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ received: 2 });
     expect(billing.bounces).toHaveLength(1);
+  });
+
+  it('routes ?account= webhooks to that account, and refuses unknown accounts', async () => {
+    const marketing = memory({ name: 'smtp-marketing' });
+    const { url, app, billing } = await start({ email: memory(), accounts: { marketing: { email: marketing } }, webhooks: true }, { fastify });
+    const { messageId } = await app.get(RelayoService).account('marketing').email.send(message);
+    const body = JSON.stringify(marketing.createEvent(messageId, 'delivered'));
+
+    const response = await post(`${url}/webhooks/relayo/email?account=marketing`, body);
+    expect(response.status).toBe(200);
+    expect(billing.all).toEqual([expect.objectContaining({ type: 'delivered', account: 'marketing' })]);
+    expect((await post(`${url}/webhooks/relayo/email?account=ventas`, body)).status).toBe(400);
   });
 
   it('reads JSON posted as text/plain, as Amazon SNS does', async () => {

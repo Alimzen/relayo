@@ -1,7 +1,7 @@
 import { createHmac } from 'node:crypto';
-import { AuthenticationError, createRelayo, ProviderUnavailableError, ValidationError } from '@alimzen/relayo';
+import { AuthenticationError, createRelayo, ProviderUnavailableError, ValidationError, WebhookVerificationError } from '@alimzen/relayo';
 import { describe, expect, it, vi } from 'vitest';
-import { scenarioAddress, simulator } from '../src/index.js';
+import { scenarioAddress, scenarioNumber, simulator, simulatorSms } from '../src/index.js';
 
 const fakeFetch = (response: () => Response | Promise<Response>) =>
   vi.fn(async (_url: string | URL | Request, _init?: RequestInit) => response());
@@ -54,6 +54,39 @@ describe('simulator driver', () => {
       metadata: { k: 'v' },
       relayoMessageId: 'msg_1',
     });
+  });
+
+  it('sends SMS to /v1/sms with Relayo\'s message id', async () => {
+    const fetch = fakeFetch(() => Response.json({ id: 'sim_sms', status: 'queued' }, { status: 202 }));
+    const relayo = createRelayo({ sms: simulatorSms({ apiKey: 'k', baseUrl: 'http://x/', fetch }), generateId: () => 'msg_sms' });
+
+    const result = await relayo.sms.send({ from: 'Empresa', to: { address: scenarioNumber('invalid-number') }, body: 'Tu código: 1234', metadata: { k: 'v' } });
+
+    expect(result).toEqual({ messageId: 'msg_sms', providerMessageId: 'sim_sms', provider: 'simulator', status: 'queued' });
+    const [url, init] = fetch.mock.calls[0]!;
+    expect(url).toBe('http://x/v1/sms');
+    expect(JSON.parse(init!.body as string)).toEqual({
+      from: 'Empresa',
+      to: ['+12015550101'],
+      body: 'Tu código: 1234',
+      metadata: { k: 'v' },
+      relayoMessageId: 'msg_sms',
+    });
+  });
+
+  it('verifies SMS webhooks like email ones', async () => {
+    const relayo = createRelayo({ sms: simulatorSms({ apiKey: 'k', baseUrl: 'http://x', webhook: { secret: 'whsec_test' } }) });
+    const event = { id: 'e1', type: 'unsubscribed', channel: 'sms', provider: 'simulator', messageId: 'm', recipient: '+12015550105', timestamp: new Date().toISOString(), raw: {} };
+    const events = await relayo.handleWebhook('sms', signed(event));
+    expect(events).toEqual([expect.objectContaining({ type: 'unsubscribed', channel: 'sms', recipient: '+12015550105' })]);
+    const otherSecret = createRelayo({ sms: simulatorSms({ apiKey: 'k', baseUrl: 'http://x', webhook: { secret: 'whsec_other' } }) });
+    await expect(otherSecret.handleWebhook('sms', signed(event))).rejects.toBeInstanceOf(WebhookVerificationError);
+  });
+
+  it('maps SMS scenarios to their numbers', () => {
+    expect(scenarioNumber('delivered')).toBe('+12015550100');
+    expect(scenarioNumber('opt-out')).toBe('+12015550105');
+    expect(() => scenarioNumber('nope' as never)).toThrow('Unknown SMS scenario');
   });
 
   it('sends attachments in base64 and the reply-to address, so the simulator captures them', async () => {

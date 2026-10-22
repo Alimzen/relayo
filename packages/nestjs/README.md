@@ -76,10 +76,22 @@ export class InvoiceMailer {
 }
 ```
 
-`@OnRelayoEvent()` takes one or more event types, or `'*'` for all, and works on singleton providers.
-Request-scoped providers are skipped with a warning. `RelayoService` has the same API as the `Relayo`
-instance (`email`, `sms`, `on`, `off`, `emit`, `handleWebhook`); the `RELAYO_CLIENT` token gives you the
-instance itself.
+`@OnRelayoEvent()` takes one or more event types, or `'*'` for all, and works on singleton providers and
+controllers. Request-scoped classes are skipped with a warning. At startup the module logs every handler it
+subscribed:
+
+```
+[RelayoModule] @OnRelayoEvent handlers: InvoiceMailer.onBounce (bounced), InvoiceMailer.onOptOut (complained, unsubscribed)
+```
+
+If a handler you expect is not in that line, its class is not registered in a module (`providers` or
+`controllers`). If it is listed but never runs, the events are not reaching this module's instance: receive
+webhooks with `webhooks: true` or `RelayoService.handleWebhook()`, not with a separate `createRelayo()`. `RelayoService` has the same API as the `Relayo`
+instance (`email`, `sms`, `account()`, `accounts`, `on`, `off`, `emit`, `handleWebhook`); the `RELAYO_CLIENT`
+token gives you the instance itself.
+
+Several accounts go in the module options too, `RelayoModule.forRoot({ email: ses(...), accounts: { marketing: { email: smtp(...) } } })`,
+and are used with `this.relayo.account('marketing').email.send(...)`.
 
 ## Webhooks
 
@@ -88,6 +100,8 @@ With `webhooks: true` (or `{ path: 'hooks/mail' }`) the module adds:
 - `POST /webhooks/relayo/:channel`, e.g. `/webhooks/relayo/email`
 - `POST /webhooks/relayo/:channel/:provider`, e.g. `/webhooks/relayo/email/sendgrid`. Use this form with
   `failover()`, one URL per provider.
+- `?account=<name>` on either route for webhooks of a named account, e.g. `/webhooks/relayo/email?account=marketing`.
+  Unknown accounts get a `400`.
 
 | Response | When |
 | --- | --- |

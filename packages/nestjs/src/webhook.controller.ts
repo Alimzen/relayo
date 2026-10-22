@@ -6,6 +6,7 @@ import {
   Logger,
   Param,
   Post,
+  Query,
   Req,
   UnauthorizedException,
   type Type,
@@ -32,6 +33,7 @@ export interface WebhookResponse {
 /**
  * Builds the controller that receives provider webhooks:
  * `POST <path>/:channel` and `POST <path>/:channel/:provider` (the second one is needed with `failover()`).
+ * Add `?account=<name>` for webhooks of a named account (`accounts` in the module options).
  */
 export function createWebhookController(path: string): Type<unknown> {
   @Controller(path)
@@ -43,8 +45,12 @@ export function createWebhookController(path: string): Type<unknown> {
 
     @Post(':channel')
     @HttpCode(200)
-    receive(@Param('channel') channel: string, @Req() req: IncomingRequest): Promise<WebhookResponse> {
-      return this.handle(channel, undefined, req);
+    receive(
+      @Param('channel') channel: string,
+      @Query('account') account: string | undefined,
+      @Req() req: IncomingRequest,
+    ): Promise<WebhookResponse> {
+      return this.handle(channel, undefined, account, req);
     }
 
     @Post(':channel/:provider')
@@ -52,14 +58,24 @@ export function createWebhookController(path: string): Type<unknown> {
     receiveFrom(
       @Param('channel') channel: string,
       @Param('provider') provider: string,
+      @Query('account') account: string | undefined,
       @Req() req: IncomingRequest,
     ): Promise<WebhookResponse> {
-      return this.handle(channel, provider, req);
+      return this.handle(channel, provider, account, req);
     }
 
-    private async handle(channel: string, provider: string | undefined, req: IncomingRequest): Promise<WebhookResponse> {
+    private async handle(
+      channel: string,
+      provider: string | undefined,
+      account: string | undefined,
+      req: IncomingRequest,
+    ): Promise<WebhookResponse> {
       if (!CHANNELS.has(channel)) throw new BadRequestException(`Unknown channel "${channel}"`);
+      if (account !== undefined && !this.relayo.accounts.includes(account)) {
+        throw new BadRequestException(`Unknown account "${account}"`);
+      }
       const webhook = await toWebhookRequest(req, provider);
+      if (account !== undefined) webhook.account = account;
       try {
         const events = await this.relayo.handleWebhook(channel as Channel, webhook);
         return { received: events.length };
