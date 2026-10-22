@@ -39,6 +39,11 @@ export interface WebhookRequest {
   provider?: string;
   /** Name of the account (`config.accounts`) the webhook belongs to; the default account when absent. */
   account?: string;
+  /**
+   * The URL the provider called: absolute, or the path and query. Providers that sign the URL (Twilio) or
+   * put data in it need it.
+   */
+  url?: string;
 }
 
 export interface Driver<M extends BaseMessage = BaseMessage> {

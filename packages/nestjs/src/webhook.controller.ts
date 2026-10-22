@@ -22,6 +22,9 @@ interface IncomingRequest extends AsyncIterable<Uint8Array> {
   headers: Record<string, string | string[] | undefined>;
   body?: unknown;
   rawBody?: Buffer;
+  /** Express keeps the full path here; Fastify in `url`. */
+  originalUrl?: string;
+  url?: string;
   readable?: boolean;
   readableEnded?: boolean;
 }
@@ -112,6 +115,9 @@ async function toWebhookRequest(req: IncomingRequest, provider: string | undefin
     body: isEmptyBody(req.body) && rawBody !== undefined ? rawBody : req.body,
   };
   if (rawBody !== undefined) request.rawBody = rawBody;
+  // Path and query as called: Twilio signs the URL and carries the message id in it.
+  const url = req.originalUrl ?? req.url;
+  if (url) request.url = url;
   if (provider !== undefined) request.provider = provider;
   return request;
 }

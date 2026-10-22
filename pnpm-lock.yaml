@@ -146,6 +146,12 @@ importers:
         specifier: ^3.19.23
         version: 3.19.23
 
+  packages/twilio:
+    devDependencies:
+      '@alimzen/relayo':
+        specifier: workspace:^
+        version: link:../core
+
 packages:
 
   /@aws-sdk/client-sesv2@3.1152.0:
