@@ -1,5 +1,11 @@
 # @alimzen/relayo-simulator
 
+## 0.2.0
+
+### Minor Changes
+
+- 350fcd0: `simulatorSms()`: send SMS to Relayo Sim and get their events (delivered, bounces, opt-outs...) through the same signed webhook. `scenarioNumber(name)` and `SMS_SCENARIO_NUMBERS` give the scenario numbers.
+
 ## 0.1.1
 
 ### Patch Changes
