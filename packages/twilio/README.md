@@ -27,18 +27,25 @@ relayo.on('bounced', (event) => event.channel === 'sms' && markPhoneInvalid(even
 
 ## WhatsApp
 
-Write the recipient as  and the driver sends through WhatsApp, from  (your
-WhatsApp-enabled Twilio sender; the  prefix is added for you). Statuses and STOP replies come back
-the same way, with  as an  event.
+Write the recipient as `whatsapp:+34600111222` and the driver sends through WhatsApp, from `whatsappFrom` (your
+WhatsApp-enabled Twilio sender; the `whatsapp:` prefix is added for you). Statuses and STOP replies come back
+the same way, with `read` as an `opened` event.
 
 WhatsApp only allows free text within 24 hours of the user's last message. Outside that window, send an approved
 template; the body is then just the message's readable summary:
 
-\
+```ts
+await relayo.sms.send({
+  to: { address: 'whatsapp:+34600111222' },
+  body: 'Recordatorio de cita',
+  providerOptions: { twilio: { contentSid: 'HX…', contentVariables: { 1: 'Ana', 2: '10:00' } } },
+});
+```
+
 | Twilio | Relayo event |
 | --- | --- |
-|  63016 |  /  (free text outside the 24-hour window: use a template) |
-|  63003, 63024 |  /  (no WhatsApp account) |
+| `failed` 63016 | `rejected` / `content_rejected` (free text outside the 24-hour window: use a template) |
+| `failed` 63003, 63024 | `rejected` / `invalid_recipient` (no WhatsApp account) |
 
 ## Webhooks
 
