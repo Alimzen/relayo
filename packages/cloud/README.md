@@ -29,7 +29,7 @@ The project's keys decide what happens; your code stays the same.
 | Key | What it does |
 | --- | --- |
 | `rly_test_…` | Simulates: scenario addresses (`hard-bounce@sim.relayo.dev`…) and numbers play bounces, complaints, deferrals… Nothing is delivered. |
-| `rly_live_…` | Delivers through the providers connected to the project in the panel (SES, SendGrid, Resend, Postmark, Mailgun, SMTP), in order, with failover. |
+| `rly_live_…` | Delivers through the providers connected to the project in the panel (SES, SendGrid, Resend, Postmark, Mailgun or SMTP for email; Twilio for SMS), in order, with failover, or through Relayo's own sending once the project is approved. |
 
 In live mode the platform also keeps a suppression list (hard bounces, complaints and unsubscribes are not
 sent to again) and receives your providers' webhooks, so all their events reach your app through the one
