@@ -22,6 +22,21 @@ await relayo.email.send({ from: { address: 'billing@example.com' }, to: { addres
 relayo.on('bounced', (event) => markInvalid(event.recipient));
 ```
 
+## Templates and scheduled sends
+
+Templates saved in the panel (Plantillas) are sent by alias, with their variables; the platform fills subject
+and content. `sendAt` sends later (up to 30 days); the platform keeps it, and it can be canceled in the panel.
+
+```ts
+await relayo.email.send({
+  from: { address: 'billing@example.com' },
+  to: { address: 'ana@example.com' },
+  template: { id: 'invoice', variables: { name: 'Ana', total: '35.09 €' } },
+  sendAt: new Date('2026-11-01T09:00:00Z'),
+  idempotencyKey: 'invoice-1042', // a retry with the same key is not sent twice
+});
+```
+
 ## Test and live keys
 
 The project's keys decide what happens; your code stays the same.

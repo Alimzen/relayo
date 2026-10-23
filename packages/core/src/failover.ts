@@ -29,7 +29,7 @@ export interface FailoverDriver<M extends BaseMessage> extends Driver<M> {
   readonly drivers: readonly Driver<M>[];
 }
 
-const CAPABILITIES = ['batch', 'attachments', 'scheduling', 'tracking', 'webhooks'] as const;
+const CAPABILITIES = ['batch', 'attachments', 'scheduling', 'tracking', 'webhooks', 'templates'] as const;
 
 function defaultShouldFailover(error: unknown): boolean {
   return isRelayoError(error) && error.retryable;
@@ -39,6 +39,8 @@ function defaultShouldFailover(error: unknown): boolean {
 function requirements(message: BaseMessage): Array<keyof DriverCapabilities> {
   const needs: Array<keyof DriverCapabilities> = [];
   if ((message as { attachments?: unknown[] }).attachments?.length) needs.push('attachments');
+  if (message.template) needs.push('templates');
+  if (message.sendAt) needs.push('scheduling');
   return needs;
 }
 

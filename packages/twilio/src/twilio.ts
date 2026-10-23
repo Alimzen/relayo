@@ -114,7 +114,7 @@ export function twilio(options: TwilioDriverOptions): Driver<SmsMessage> {
         const whatsapp = to.startsWith(WHATSAPP_PREFIX);
         const form = new URLSearchParams({ To: to });
         // With an approved template the body is only the message's readable summary: Twilio sends the template.
-        if (!extra.contentSid) form.set('Body', message.body);
+        if (!extra.contentSid) form.set('Body', message.body ?? '');
         if (extra.contentSid) {
           form.set('ContentSid', extra.contentSid);
           if (extra.contentVariables) {

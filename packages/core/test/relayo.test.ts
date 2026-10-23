@@ -88,6 +88,28 @@ describe('createRelayo', () => {
       ).rejects.toThrow(/does not support attachments/);
     });
 
+    it('takes a template instead of the content, on drivers that support templates', async () => {
+      const templated = { from: email.from, to: email.to, template: { id: 'factura', variables: { total: '35,09 €' } } };
+      const plain = createRelayo({ email: memory() });
+      await expect(plain.email.send(templated)).rejects.toThrow(/does not support templates/);
+      await expect(plain.email.send({ from: email.from, to: email.to })).rejects.toThrow(/needs a "subject" \(or a "template"\)/);
+
+      const withTemplates = createRelayo({ email: memory({ capabilities: { templates: true } }), sms: memory({ channel: 'sms', capabilities: { templates: true } }) });
+      await expect(withTemplates.email.send(templated)).resolves.toMatchObject({ status: 'sent' });
+      await expect(withTemplates.email.send({ ...templated, template: { id: '' } })).rejects.toThrow(/needs an "id"/);
+      await expect(withTemplates.sms.send({ to: { address: '+34600000000' }, template: { id: 'otp', variables: { code: '1234' } } })).resolves.toMatchObject({
+        status: 'sent',
+      });
+    });
+
+    it('schedules (sendAt) only on drivers with scheduling', async () => {
+      const later = new Date(Date.now() + 3_600_000);
+      await expect(createRelayo({ email: memory() }).email.send({ ...email, sendAt: later })).rejects.toThrow(/does not support scheduling/);
+      const scheduling = createRelayo({ email: memory({ capabilities: { scheduling: true } }) });
+      await expect(scheduling.email.send({ ...email, sendAt: later })).resolves.toMatchObject({ status: 'sent' });
+      await expect(scheduling.email.send({ ...email, sendAt: new Date('nope') })).rejects.toThrow(/valid Date/);
+    });
+
     it('validates the whole batch before sending anything', async () => {
       const driver = memory();
       const r = createRelayo({ email: driver });

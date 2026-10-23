@@ -4,6 +4,7 @@ import {
   ProviderUnavailableError,
   RateLimitError,
   ValidationError,
+  type BaseMessage,
   type Driver,
   type EmailMessage,
   type RelayoError,
@@ -53,7 +54,7 @@ export function simulator(options: SimulatorDriverOptions): Driver<EmailMessage>
   return {
     name,
     channel: 'email',
-    capabilities: { batch: false, attachments: true, scheduling: false, tracking: true, webhooks: true },
+    capabilities: { batch: false, attachments: true, scheduling: true, tracking: true, webhooks: true, templates: true },
 
     async send(message, context) {
       const to = Array.isArray(message.to) ? message.to : [message.to];
@@ -78,6 +79,7 @@ export function simulator(options: SimulatorDriverOptions): Driver<EmailMessage>
         ...(message.metadata && { metadata: message.metadata }),
         ...(message.tags && { tags: message.tags }),
         relayoMessageId: context.messageId,
+        ...platformFields(message),
       };
 
       let response: Response;
@@ -88,7 +90,7 @@ export function simulator(options: SimulatorDriverOptions): Driver<EmailMessage>
             Authorization: `Bearer ${options.apiKey}`,
             'Content-Type': 'application/json',
             // The core's id is the same on every retry: a repeat after a timeout does not send twice.
-            'Idempotency-Key': context.messageId,
+            'Idempotency-Key': message.idempotencyKey ?? context.messageId,
           },
           body: JSON.stringify(body),
           signal: AbortSignal.timeout(options.timeoutMs ?? 30_000),
@@ -123,7 +125,7 @@ export function simulatorSms(options: SimulatorDriverOptions): Driver<SmsMessage
   return {
     name,
     channel: 'sms',
-    capabilities: { batch: false, attachments: false, scheduling: false, tracking: false, webhooks: true },
+    capabilities: { batch: false, attachments: false, scheduling: true, tracking: false, webhooks: true, templates: true },
 
     async send(message, context) {
       const to = (Array.isArray(message.to) ? message.to : [message.to]).map((r) => r.address);
@@ -134,6 +136,7 @@ export function simulatorSms(options: SimulatorDriverOptions): Driver<SmsMessage
         ...(message.metadata && { metadata: message.metadata }),
         ...(message.tags && { tags: message.tags }),
         relayoMessageId: context.messageId,
+        ...platformFields(message),
       };
 
       let response: Response;
@@ -144,7 +147,7 @@ export function simulatorSms(options: SimulatorDriverOptions): Driver<SmsMessage
             Authorization: `Bearer ${options.apiKey}`,
             'Content-Type': 'application/json',
             // The core's id is the same on every retry: a repeat after a timeout does not send twice.
-            'Idempotency-Key': context.messageId,
+            'Idempotency-Key': message.idempotencyKey ?? context.messageId,
           },
           body: JSON.stringify(body),
           signal: AbortSignal.timeout(options.timeoutMs ?? 30_000),
@@ -249,4 +252,12 @@ function readBody(req: WebhookRequest): unknown {
   if (typeof source === 'string') return JSON.parse(source);
   if (source instanceof Uint8Array) return JSON.parse(Buffer.from(source).toString('utf8'));
   return source;
+}
+
+/** Templates saved in the platform, and sends scheduled there: the API's `template`, `variables` and `sendAt`. */
+function platformFields(message: BaseMessage): Record<string, unknown> {
+  return {
+    ...(message.template && { template: message.template.id, ...(message.template.variables && { variables: message.template.variables }) }),
+    ...(message.sendAt && { sendAt: message.sendAt.toISOString() }),
+  };
 }

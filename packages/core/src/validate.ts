@@ -29,14 +29,29 @@ export function validateEmail(message: EmailMessage, driver: Driver<EmailMessage
   message.bcc?.forEach((r) => checkEmailAddress(r, 'bcc'));
   checkEmailAddress(message.from, 'from');
   if (message.replyTo) checkEmailAddress(message.replyTo, 'replyTo');
-  if (typeof message.subject !== 'string') fail('Email message needs a "subject"');
-  if (!message.html && !message.text) fail('Email message needs "html" or "text"');
+  if (!message.template) {
+    if (typeof message.subject !== 'string') fail('Email message needs a "subject" (or a "template")');
+    if (!message.html && !message.text) fail('Email message needs "html" or "text" (or a "template")');
+  }
+  checkCommon(message, driver);
   if (message.attachments?.length && !driver.capabilities.attachments) {
     fail(`Driver "${driver.name}" does not support attachments`, driver.name);
   }
 }
 
-export function validateSms(message: SmsMessage): void {
+/** Template and schedule: fields only some drivers support. */
+function checkCommon(message: BaseMessage, driver: Driver<BaseMessage>): void {
+  if (message.template !== undefined) {
+    if (!message.template || typeof message.template.id !== 'string' || !message.template.id) fail('"template" needs an "id"');
+    if (!driver.capabilities.templates) fail(`Driver "${driver.name}" does not support templates`, driver.name);
+  }
+  if (message.sendAt !== undefined) {
+    if (!(message.sendAt instanceof Date) || Number.isNaN(message.sendAt.getTime())) fail('"sendAt" must be a valid Date');
+    if (!driver.capabilities.scheduling) fail(`Driver "${driver.name}" does not support scheduling (sendAt)`, driver.name);
+  }
+}
+
+export function validateSms(message: SmsMessage, driver?: Driver<SmsMessage>): void {
   const to = toRecipients(message.to);
   if (to.length === 0) fail('SMS message needs at least one recipient in "to"');
   for (const r of to) {
@@ -44,15 +59,16 @@ export function validateSms(message: SmsMessage): void {
       fail(`Invalid phone number in "to" (expected E.164, e.g. +34600000000): ${JSON.stringify(r?.address)}`);
     }
   }
-  if (typeof message.body !== 'string' || message.body.length === 0) {
-    fail('SMS message needs a non-empty "body"');
+  if (!message.template && (typeof message.body !== 'string' || message.body.length === 0)) {
+    fail('SMS message needs a non-empty "body" (or a "template")');
   }
+  if (driver) checkCommon(message, driver as unknown as Driver<BaseMessage>);
 }
 
 export function validate<M extends BaseMessage>(message: M, driver: Driver<M>): void {
   if (driver.channel === 'email') {
     validateEmail(message as unknown as EmailMessage, driver as unknown as Driver<EmailMessage>);
   } else {
-    validateSms(message as unknown as SmsMessage);
+    validateSms(message as unknown as SmsMessage, driver as unknown as Driver<SmsMessage>);
   }
 }

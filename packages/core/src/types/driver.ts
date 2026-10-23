@@ -24,6 +24,8 @@ export interface DriverCapabilities {
   /** Opens and clicks. */
   tracking: boolean;
   webhooks: boolean;
+  /** Messages with a `template` saved at the provider. Absent means no. */
+  templates?: boolean;
 }
 
 export interface WebhookRequest {

@@ -14,8 +14,22 @@ export interface Attachment {
   cid?: string;
 }
 
+/**
+ * A template saved with the provider (Relayo's, SendGrid's dynamic templates...), filled with `variables`.
+ * Only drivers with the `templates` capability accept it.
+ */
+export interface MessageTemplate {
+  /** The template's id or alias at the provider. */
+  id: string;
+  variables?: Record<string, unknown>;
+}
+
 export interface BaseMessage {
   to: Recipient | Recipient[];
+  /** Content from a template saved with the provider, instead of writing it here. */
+  template?: MessageTemplate;
+  /** Send later. Only drivers with the `scheduling` capability accept it. */
+  sendAt?: Date;
   /** Travels to every event emitted for this message. */
   metadata?: Record<string, string>;
   tags?: string[];
@@ -42,7 +56,8 @@ export interface EmailMessage extends BaseMessage {
   replyTo?: Recipient;
   cc?: Recipient[];
   bcc?: Recipient[];
-  subject: string;
+  /** Required unless `template` gives it. */
+  subject?: string;
   html?: string;
   text?: string;
   attachments?: Attachment[];
@@ -52,7 +67,8 @@ export interface EmailMessage extends BaseMessage {
 
 export interface SmsMessage extends BaseMessage {
   from?: string;
-  body: string;
+  /** Required unless `template` gives it. */
+  body?: string;
 }
 
 export type MessageFor<C extends Channel> = C extends 'email' ? EmailMessage : SmsMessage;

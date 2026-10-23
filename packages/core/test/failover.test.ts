@@ -107,6 +107,17 @@ describe('failover', () => {
     expect(a.sent).toHaveLength(0);
   });
 
+  it('sends templates and scheduled messages only through drivers that support them', async () => {
+    const a = memory({ name: 'a' });
+    const b = memory({ name: 'b', capabilities: { templates: true, scheduling: true } });
+    const relayo = createRelayo({ email: failover([a, b]) });
+
+    expect((await relayo.email.send({ from: email.from, to: email.to, template: { id: 'bienvenida' } })).provider).toBe('b');
+    expect((await relayo.email.send({ ...email, sendAt: new Date(Date.now() + 60_000) })).provider).toBe('b');
+    expect((await relayo.email.send(email)).provider).toBe('a');
+    expect(a.sent).toHaveLength(1);
+  });
+
   it('reports the union of capabilities and rejects messages no driver can send', async () => {
     const noAttachments = () => memory({ capabilities: { attachments: false } });
     const driver = failover([memory({ name: 'a', capabilities: { attachments: false } }), memory({ name: 'b' })]);

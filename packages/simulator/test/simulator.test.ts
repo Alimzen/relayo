@@ -29,6 +29,38 @@ const bounce = {
   raw: { scenario: { name: 'hard-bounce' } },
 };
 
+describe('platform templates and scheduling', () => {
+  it('sends template, variables and sendAt, and the idempotency key given', async () => {
+    const fetch = fakeFetch(() => Response.json({ id: 'sch_1', status: 'scheduled' }, { status: 202 }));
+    const relayo = createRelayo({
+      email: simulator({ apiKey: 'rly_live_x', baseUrl: 'http://localhost:3000', fetch }),
+      sms: simulatorSms({ apiKey: 'rly_live_x', baseUrl: 'http://localhost:3000', fetch }),
+      generateId: () => 'msg_9',
+    });
+    const sendAt = new Date('2026-11-01T09:00:00Z');
+
+    const result = await relayo.email.send({
+      from: { address: 'a@empresa.com' },
+      to: { address: 'ana@ejemplo.com' },
+      template: { id: 'factura', variables: { total: '35,09 €' } },
+      sendAt,
+      idempotencyKey: 'factura-1042',
+    });
+    expect(result).toMatchObject({ messageId: 'msg_9', providerMessageId: 'sch_1', status: 'queued' });
+    const [, init] = fetch.mock.calls[0]!;
+    expect(init?.headers).toMatchObject({ 'Idempotency-Key': 'factura-1042' });
+    const body = JSON.parse(init!.body as string) as Record<string, unknown>;
+    expect(body).toMatchObject({ template: 'factura', variables: { total: '35,09 €' }, sendAt: '2026-11-01T09:00:00.000Z', relayoMessageId: 'msg_9' });
+    expect(body).not.toHaveProperty('subject');
+
+    await relayo.sms.send({ to: { address: '+34600111222' }, template: { id: 'otp', variables: { code: '1234' } } });
+    const sms = JSON.parse(fetch.mock.calls[1]![1]!.body as string) as Record<string, unknown>;
+    expect(sms).toMatchObject({ template: 'otp', variables: { code: '1234' } });
+    expect(sms).not.toHaveProperty('body');
+    expect(fetch.mock.calls[1]![1]!.headers).toMatchObject({ 'Idempotency-Key': 'msg_9' });
+  });
+});
+
 describe('simulator driver', () => {
   it('posts to /v1/messages with Relayo\'s message id', async () => {
     const fetch = fakeFetch(() => Response.json({ id: 'sim_1', status: 'queued' }, { status: 202 }));
