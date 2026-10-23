@@ -48,7 +48,7 @@ describe('simulator driver', () => {
     expect(result).toEqual({ messageId: 'msg_1', providerMessageId: 'sim_1', provider: 'simulator', status: 'queued' });
     const [url, init] = fetch.mock.calls[0]!;
     expect(url).toBe('http://localhost:3000/v1/messages');
-    expect(init?.headers).toMatchObject({ Authorization: 'Bearer sim_live_x' });
+    expect(init?.headers).toMatchObject({ Authorization: 'Bearer sim_live_x', 'Idempotency-Key': 'msg_1' });
     expect(JSON.parse(init!.body as string)).toMatchObject({
       to: [{ address: 'hard-bounce@sim.relayo.dev' }],
       metadata: { k: 'v' },

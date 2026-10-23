@@ -84,7 +84,12 @@ export function simulator(options: SimulatorDriverOptions): Driver<EmailMessage>
       try {
         response = await doFetch(`${baseUrl}/v1/messages`, {
           method: 'POST',
-          headers: { Authorization: `Bearer ${options.apiKey}`, 'Content-Type': 'application/json' },
+          headers: {
+            Authorization: `Bearer ${options.apiKey}`,
+            'Content-Type': 'application/json',
+            // The core's id is the same on every retry: a repeat after a timeout does not send twice.
+            'Idempotency-Key': context.messageId,
+          },
           body: JSON.stringify(body),
           signal: AbortSignal.timeout(options.timeoutMs ?? 30_000),
         });
@@ -135,7 +140,12 @@ export function simulatorSms(options: SimulatorDriverOptions): Driver<SmsMessage
       try {
         response = await doFetch(`${baseUrl}/v1/sms`, {
           method: 'POST',
-          headers: { Authorization: `Bearer ${options.apiKey}`, 'Content-Type': 'application/json' },
+          headers: {
+            Authorization: `Bearer ${options.apiKey}`,
+            'Content-Type': 'application/json',
+            // The core's id is the same on every retry: a repeat after a timeout does not send twice.
+            'Idempotency-Key': context.messageId,
+          },
           body: JSON.stringify(body),
           signal: AbortSignal.timeout(options.timeoutMs ?? 30_000),
         });
@@ -228,6 +238,8 @@ async function errorFromResponse(response: Response, provider: string): Promise<
   const options = { provider, raw: { status: response.status, message: detail } };
   if (response.status === 401 || response.status === 403) return new AuthenticationError(message, options);
   if (response.status === 429) return new RateLimitError(message, options);
+  // The same message is still being sent (a retry raced the first try): retry later.
+  if (response.status === 409) return new ProviderUnavailableError(message, options);
   if (response.status >= 500) return new ProviderUnavailableError(message, options);
   return new ValidationError(message, options);
 }
