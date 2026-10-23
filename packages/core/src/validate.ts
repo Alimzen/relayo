@@ -4,7 +4,8 @@ import type { Driver } from './types/driver.js';
 import type { BaseMessage, EmailMessage, Recipient, SmsMessage } from './types/message.js';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+$/;
-const E164_RE = /^\+[1-9]\d{1,14}$/;
+/** E.164, optionally prefixed with a channel the SMS drivers route on (`whatsapp:+34600000000`). */
+const E164_RE = /^(whatsapp:)?\+[1-9]\d{1,14}$/;
 
 export function toRecipients(to: Recipient | Recipient[]): Recipient[] {
   return Array.isArray(to) ? to : [to];

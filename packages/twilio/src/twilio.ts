@@ -20,6 +20,19 @@ import {
 export const SIGNATURE_HEADER = 'x-twilio-signature';
 /** Query parameter of the status callback URL that carries Relayo's message id back. */
 export const MESSAGE_ID_PARAM = 'relayo_message_id';
+/** Recipients written with this prefix go through WhatsApp instead of SMS. */
+export const WHATSAPP_PREFIX = 'whatsapp:';
+
+/**
+ * Twilio-specific options of a message, in `providerOptions.twilio`. WhatsApp only allows free text within
+ * 24 hours of the user's last message; outside that window, send an approved template (Content API).
+ */
+export interface TwilioMessageOptions {
+  /** Approved content template (`HX...`); the body can then be empty. */
+  contentSid?: string;
+  /** Its variables: `{ "1": "Ana", "2": "10:00" }`. */
+  contentVariables?: Record<string, string> | string;
+}
 
 export interface TwilioWebhookOptions {
   /** Set to false to accept unsigned callbacks (local development). Default true. */
@@ -33,6 +46,11 @@ export interface TwilioDriverOptions {
   from?: string;
   /** Send through a Messaging Service (`MG...`) instead of a single number. */
   messagingServiceSid?: string;
+  /**
+   * Sender for WhatsApp (`+14155238886`): used for recipients written `whatsapp:+34600111222`. Defaults to
+   * `from`. The `whatsapp:` prefix is added for you.
+   */
+  whatsappFrom?: string;
   /**
    * Public URL of your webhook for this driver, e.g. `https://app.example.com/webhooks/relayo/sms`. Twilio posts
    * each message's status there; Relayo adds the message id to it, so the events map back.
@@ -61,6 +79,9 @@ const REJECTIONS: Record<number, RejectEvent['reason']> = {
   21211: 'invalid_recipient',
   21614: 'invalid_recipient',
   21612: 'invalid_recipient',
+  63003: 'invalid_recipient', // WhatsApp: the number has no WhatsApp account
+  63024: 'invalid_recipient', // WhatsApp: invalid recipient
+  63016: 'content_rejected', // WhatsApp: free text outside the 24-hour window; send a template (contentSid)
 };
 
 /**
@@ -69,7 +90,9 @@ const REJECTIONS: Record<number, RejectEvent['reason']> = {
  */
 export function twilio(options: TwilioDriverOptions): Driver<SmsMessage> {
   if (!options.accountSid || !options.authToken) throw new ValidationError('twilio() needs accountSid and authToken');
-  if (!options.from && !options.messagingServiceSid) throw new ValidationError('twilio() needs a from number or a messagingServiceSid');
+  if (!options.from && !options.messagingServiceSid && !options.whatsappFrom) {
+    throw new ValidationError('twilio() needs a from number, a whatsappFrom number or a messagingServiceSid');
+  }
   const name = options.name ?? 'twilio';
   const baseUrl = (options.baseUrl ?? 'https://api.twilio.com').replace(/\/$/, '');
   const doFetch = options.fetch ?? globalThis.fetch;
@@ -86,10 +109,24 @@ export function twilio(options: TwilioDriverOptions): Driver<SmsMessage> {
       const rejected: string[] = [];
       let lastError: RelayoError | undefined;
 
+      const extra = (message.providerOptions?.twilio ?? {}) as TwilioMessageOptions;
       for (const to of recipients) {
-        const form = new URLSearchParams({ To: to, Body: message.body });
+        const whatsapp = to.startsWith(WHATSAPP_PREFIX);
+        const form = new URLSearchParams({ To: to });
+        // With an approved template the body is only the message's readable summary: Twilio sends the template.
+        if (!extra.contentSid) form.set('Body', message.body);
+        if (extra.contentSid) {
+          form.set('ContentSid', extra.contentSid);
+          if (extra.contentVariables) {
+            form.set('ContentVariables', typeof extra.contentVariables === 'string' ? extra.contentVariables : JSON.stringify(extra.contentVariables));
+          }
+        }
         if (options.messagingServiceSid) form.set('MessagingServiceSid', options.messagingServiceSid);
-        else form.set('From', message.from ?? options.from!);
+        else {
+          const from = message.from ?? (whatsapp ? (options.whatsappFrom ?? options.from) : options.from);
+          if (!from) throw new ValidationError(`Driver "${name}" has no ${whatsapp ? 'WhatsApp' : 'SMS'} sender: set ${whatsapp ? 'whatsappFrom' : 'from'}`, { provider: name });
+          form.set('From', whatsapp && !from.startsWith(WHATSAPP_PREFIX) ? WHATSAPP_PREFIX + from : from);
+        }
         if (options.statusCallback) form.set('StatusCallback', withMessageId(options.statusCallback, context.messageId));
 
         let response: Response;

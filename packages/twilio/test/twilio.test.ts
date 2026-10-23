@@ -82,6 +82,41 @@ describe('twilio driver', () => {
     await expect(relayo.handleWebhook('sms', { ...tampered, url: `${CALLBACK}?relayo_message_id=other` })).rejects.toBeInstanceOf(WebhookVerificationError);
   });
 
+  it('sends to whatsapp: recipients from the WhatsApp sender, with approved templates', async () => {
+    const fetch = fakeFetch(() => Response.json({ sid: 'SM5' }, { status: 201 }));
+    const relayo = createRelayo({
+      sms: twilio({ accountSid: 'AC123', authToken: TOKEN, from: '+15550001111', whatsappFrom: '+14155238886', fetch }),
+    });
+    await relayo.sms.send({ to: [{ address: 'whatsapp:+34600111222' }, { address: '+34600333444' }], body: 'Hola' });
+    const forms = fetch.mock.calls.map((c) => Object.fromEntries(c[1]!.body as URLSearchParams));
+    expect(forms[0]).toMatchObject({ To: 'whatsapp:+34600111222', From: 'whatsapp:+14155238886', Body: 'Hola' });
+    expect(forms[1]).toMatchObject({ To: '+34600333444', From: '+15550001111' });
+
+    // Outside the 24-hour window: an approved template, without free text.
+    await relayo.sms.send({
+      to: { address: 'whatsapp:+34600111222' },
+      body: 'Recordatorio de cita (plantilla)',
+      providerOptions: { twilio: { contentSid: 'HX123', contentVariables: { 1: 'Ana', 2: '10:00' } } },
+    });
+    const template = Object.fromEntries(fetch.mock.calls[2]![1]!.body as URLSearchParams);
+    expect(template).toEqual({ To: 'whatsapp:+34600111222', From: 'whatsapp:+14155238886', ContentSid: 'HX123', ContentVariables: '{"1":"Ana","2":"10:00"}' });
+
+    // Only a WhatsApp sender: SMS recipients have none.
+    const onlyWhatsapp = createRelayo({ sms: twilio({ accountSid: 'AC123', authToken: TOKEN, whatsappFrom: '+14155238886', fetch }) });
+    await expect(onlyWhatsapp.sms.send({ to: { address: '+34600333444' }, body: 'x' })).rejects.toThrow(/no SMS sender/);
+  });
+
+  it('maps WhatsApp refusals: no account, and free text outside the 24-hour window', async () => {
+    const relayo = createRelayo({ sms: driver(vi.fn()) });
+    const url = `${CALLBACK}?relayo_message_id=msg_1`;
+    const window = await relayo.handleWebhook('sms', callback(url, { MessageSid: 'SM1', MessageStatus: 'failed', To: 'whatsapp:+34600111222', ErrorCode: '63016' }));
+    expect(window[0]).toMatchObject({ type: 'rejected', reason: 'content_rejected', recipient: 'whatsapp:+34600111222' });
+    const noAccount = await relayo.handleWebhook('sms', callback(url, { MessageSid: 'SM1', MessageStatus: 'failed', To: 'whatsapp:+1', ErrorCode: '63003' }));
+    expect(noAccount[0]).toMatchObject({ type: 'rejected', reason: 'invalid_recipient' });
+    const read = await relayo.handleWebhook('sms', callback(url, { MessageSid: 'SM1', MessageStatus: 'read', To: 'whatsapp:+1' }));
+    expect(read[0]).toMatchObject({ type: 'opened' });
+  });
+
   it('turns a STOP reply into an unsubscribe of the sender', async () => {
     const relayo = createRelayo({ sms: driver(vi.fn()) });
     const events = await relayo.handleWebhook('sms', callback(CALLBACK, { MessageSid: 'SM9', From: '+34600111222', To: '+15550001111', Body: 'STOP', OptOutType: 'STOP' }));

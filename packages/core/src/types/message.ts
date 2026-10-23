@@ -1,7 +1,7 @@
 export type Channel = 'email' | 'sms';
 
 export interface Recipient {
-  /** Email address, or phone number in E.164 format for SMS. */
+  /** Email address, or phone number in E.164 format for SMS (`whatsapp:+34…` for WhatsApp, with drivers that support it). */
   address: string;
   name?: string;
 }

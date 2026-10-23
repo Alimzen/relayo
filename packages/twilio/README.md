@@ -16,6 +16,7 @@ const relayo = createRelayo({
     accountSid: process.env.TWILIO_ACCOUNT_SID!,
     authToken: process.env.TWILIO_AUTH_TOKEN!,
     from: '+15550001111', // or messagingServiceSid: 'MG…'
+    whatsappFrom: '+14155238886', // optional: for whatsapp:+… recipients
     statusCallback: 'https://app.example.com/webhooks/relayo/sms',
   }),
 });
@@ -23,6 +24,21 @@ const relayo = createRelayo({
 await relayo.sms.send({ to: { address: '+34600111222' }, body: 'Your code is 482913', metadata: { userId: '42' } });
 relayo.on('bounced', (event) => event.channel === 'sms' && markPhoneInvalid(event.recipient));
 ```
+
+## WhatsApp
+
+Write the recipient as  and the driver sends through WhatsApp, from  (your
+WhatsApp-enabled Twilio sender; the  prefix is added for you). Statuses and STOP replies come back
+the same way, with  as an  event.
+
+WhatsApp only allows free text within 24 hours of the user's last message. Outside that window, send an approved
+template; the body is then just the message's readable summary:
+
+\
+| Twilio | Relayo event |
+| --- | --- |
+|  63016 |  /  (free text outside the 24-hour window: use a template) |
+|  63003, 63024 |  /  (no WhatsApp account) |
 
 ## Webhooks
 

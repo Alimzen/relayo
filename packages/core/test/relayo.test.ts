@@ -74,6 +74,11 @@ describe('createRelayo', () => {
       await expect(relayo.sms.send({ to: { address: '600000000' }, body: 'hola' })).rejects.toThrow(
         ValidationError,
       );
+      await expect(relayo.sms.send({ to: { address: 'whatsapp:600000000' }, body: 'hola' })).rejects.toThrow(ValidationError);
+    });
+
+    it('accepts WhatsApp numbers (whatsapp:+E.164) for drivers that route them', async () => {
+      await expect(relayo.sms.send({ to: { address: 'whatsapp:+34600000000' }, body: 'hola' })).resolves.toMatchObject({ status: 'sent' });
     });
 
     it('rejects attachments when the driver does not support them', async () => {
