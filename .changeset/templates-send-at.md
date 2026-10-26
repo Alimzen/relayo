@@ -8,7 +8,7 @@
 '@alimzen/relayo-resend': minor
 '@alimzen/relayo-ses': minor
 '@alimzen/relayo-smtp': patch
-'@alimzen/relayo-twilio': patch
+'@alimzen/relayo-twilio': minor
 ---
 
 Templates and scheduled sends in the core contract, and in the drivers.
@@ -19,7 +19,8 @@ Templates and scheduled sends in the core contract, and in the drivers.
   on drivers without them, and `failover()` skips those drivers for such messages.
 - Drivers map them to each provider's own: SendGrid dynamic templates and `send_at` (72 h), Postmark
   `/email/withTemplate`, Mailgun `template` + `t:variables` and `o:deliverytime` (7 days), Resend
-  `template` and `scheduled_at` (30 days), SES `Content.Template`. The simulator and cloud drivers send them to
+  `template` and `scheduled_at` (30 days), SES `Content.Template`, Twilio Content templates and scheduling
+  through a Messaging Service (15 min to 35 days). The simulator and cloud drivers send them to
   the Relayo platform.
 - Mailgun and Resend already declared `scheduling` without a way to ask for it; `sendAt` now reaches them.
 - The simulator and cloud drivers send the message's `idempotencyKey` (or Relayo's id) as `Idempotency-Key`.

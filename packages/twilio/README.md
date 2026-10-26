@@ -47,6 +47,13 @@ await relayo.sms.send({
 | `failed` 63016 | `rejected` / `content_rejected` (free text outside the 24-hour window: use a template) |
 | `failed` 63003, 63024 | `rejected` / `invalid_recipient` (no WhatsApp account) |
 
+## Templates and scheduling
+
+`template: { id: 'HX…', variables }` sends a Content template (`ContentSid`, with the variables as
+`ContentVariables`); the body is then just the message's readable summary. `sendAt` schedules the message
+(`ScheduleType=fixed`, `SendAt`): Twilio only does it through a Messaging Service, between 15 minutes and 35
+days ahead, so the driver offers scheduling only when it has `messagingServiceSid`.
+
 ## Webhooks
 
 Twilio posts each message's status to `statusCallback`. The driver adds Relayo's message id to that URL

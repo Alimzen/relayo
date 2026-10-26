@@ -101,7 +101,8 @@ export function twilio(options: TwilioDriverOptions): Driver<SmsMessage> {
   return {
     name,
     channel: 'sms',
-    capabilities: { batch: false, attachments: false, scheduling: false, tracking: false, webhooks: true },
+    // Content templates (HX…) always; scheduling only through a Messaging Service, as Twilio requires.
+    capabilities: { batch: false, attachments: false, scheduling: Boolean(options.messagingServiceSid), tracking: false, webhooks: true, templates: true },
 
     async send(message, context) {
       const recipients = (Array.isArray(message.to) ? message.to : [message.to]).map((r) => r.address);
@@ -110,16 +111,24 @@ export function twilio(options: TwilioDriverOptions): Driver<SmsMessage> {
       let lastError: RelayoError | undefined;
 
       const extra = (message.providerOptions?.twilio ?? {}) as TwilioMessageOptions;
+      // A Content template: the message's template, or the WhatsApp options in providerOptions.twilio.
+      const contentSid = message.template?.id ?? extra.contentSid;
+      const contentVariables = message.template ? message.template.variables : extra.contentVariables;
+      const sendAt = message.sendAt && scheduleAt(message.sendAt, name, options.messagingServiceSid);
       for (const to of recipients) {
         const whatsapp = to.startsWith(WHATSAPP_PREFIX);
         const form = new URLSearchParams({ To: to });
-        // With an approved template the body is only the message's readable summary: Twilio sends the template.
-        if (!extra.contentSid) form.set('Body', message.body ?? '');
-        if (extra.contentSid) {
-          form.set('ContentSid', extra.contentSid);
-          if (extra.contentVariables) {
-            form.set('ContentVariables', typeof extra.contentVariables === 'string' ? extra.contentVariables : JSON.stringify(extra.contentVariables));
+        // With a template the body is only the message's readable summary: Twilio sends the template.
+        if (!contentSid) form.set('Body', message.body ?? '');
+        if (contentSid) {
+          form.set('ContentSid', contentSid);
+          if (contentVariables) {
+            form.set('ContentVariables', typeof contentVariables === 'string' ? contentVariables : JSON.stringify(contentVariables));
           }
+        }
+        if (sendAt) {
+          form.set('ScheduleType', 'fixed');
+          form.set('SendAt', sendAt);
         }
         if (options.messagingServiceSid) form.set('MessagingServiceSid', options.messagingServiceSid);
         else {
@@ -174,6 +183,16 @@ export function twilio(options: TwilioDriverOptions): Driver<SmsMessage> {
       return toEvents(params, messageId, name);
     },
   };
+}
+
+/** Twilio schedules through a Messaging Service, between 15 minutes and 35 days ahead. */
+function scheduleAt(date: Date, provider: string, messagingServiceSid: string | undefined): string {
+  if (!messagingServiceSid) throw new ValidationError('Twilio schedules messages only through a Messaging Service: set messagingServiceSid', { provider });
+  const ahead = date.getTime() - Date.now();
+  if (ahead < 15 * 60_000 || ahead > 35 * 86_400_000) {
+    throw new ValidationError('Twilio schedules messages between 15 minutes and 35 days ahead', { provider });
+  }
+  return date.toISOString().replace(/\.\d{3}Z$/, 'Z');
 }
 
 /** Status callback URL with Relayo's message id, so the status maps back to the message. */

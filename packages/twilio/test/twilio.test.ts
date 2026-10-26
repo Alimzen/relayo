@@ -106,6 +106,24 @@ describe('twilio driver', () => {
     await expect(onlyWhatsapp.sms.send({ to: { address: '+34600333444' }, body: 'x' })).rejects.toThrow(/no SMS sender/);
   });
 
+  it('sends Content templates, and schedules through a Messaging Service', async () => {
+    const fetch = fakeFetch(() => Response.json({ sid: 'SM7' }, { status: 201 }));
+    const direct = createRelayo({ sms: driver(fetch) });
+    await direct.sms.send({ to: { address: 'whatsapp:+34600111222' }, template: { id: 'HX99', variables: { 1: 'Ana' } } });
+    const form = Object.fromEntries(fetch.mock.calls[0]![1]!.body as URLSearchParams);
+    expect(form).toMatchObject({ ContentSid: 'HX99', ContentVariables: '{"1":"Ana"}' });
+    expect(form).not.toHaveProperty('Body');
+    // Scheduling needs a Messaging Service.
+    await expect(direct.sms.send({ to: { address: '+34600111222' }, body: 'x', sendAt: new Date(Date.now() + 3_600_000) })).rejects.toThrow(/does not support scheduling/);
+
+    const service = createRelayo({ sms: twilio({ accountSid: 'AC123', authToken: TOKEN, messagingServiceSid: 'MG1', fetch }) });
+    const at = new Date(Math.floor(Date.now() / 1000) * 1000 + 2 * 3_600_000);
+    await service.sms.send({ to: { address: '+34600111222' }, body: 'Recordatorio', sendAt: at });
+    const scheduled = Object.fromEntries(fetch.mock.calls[1]![1]!.body as URLSearchParams);
+    expect(scheduled).toMatchObject({ MessagingServiceSid: 'MG1', ScheduleType: 'fixed', SendAt: at.toISOString().replace('.000Z', 'Z') });
+    await expect(service.sms.send({ to: { address: '+34600111222' }, body: 'x', sendAt: new Date(Date.now() + 60_000) })).rejects.toThrow(/15 minutes/);
+  });
+
   it('maps WhatsApp refusals: no account, and free text outside the 24-hour window', async () => {
     const relayo = createRelayo({ sms: driver(vi.fn()) });
     const url = `${CALLBACK}?relayo_message_id=msg_1`;
