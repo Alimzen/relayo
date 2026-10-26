@@ -44,6 +44,12 @@ Message `tags` become SES tags; characters SES doesn't allow are replaced with `
 The AWS SDK retries throttling and server errors on its own (3 attempts by default). If your queue already
 retries, pass a `client` created with `maxAttempts: 1`.
 
+## Templates
+
+`template: { id, variables }` sends an SES template, by name (or ARN, when the id starts with `arn:`), with the
+variables as `TemplateData`; Relayo's headers travel with it, so its events map back. SES has no scheduled
+sending, so `sendAt` is refused.
+
 ## Receiving events
 
 1. In SES, add an **event destination** of type SNS to your configuration set, with the event types you

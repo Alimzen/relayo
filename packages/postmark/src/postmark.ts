@@ -63,12 +63,13 @@ export function postmark(options: PostmarkDriverOptions): Driver<EmailMessage> {
   return {
     name,
     channel: 'email',
-    capabilities: { batch: false, attachments: true, scheduling: false, tracking: true, webhooks: true },
+    // Templates go to /email/withTemplate; Postmark has no scheduled sending.
+    capabilities: { batch: false, attachments: true, scheduling: false, tracking: true, webhooks: true, templates: true },
 
     async send(message, context) {
       let response: Response;
       try {
-        response = await doFetch(`${baseUrl}/email`, {
+        response = await doFetch(`${baseUrl}${message.template ? '/email/withTemplate' : '/email'}`, {
           method: 'POST',
           headers: {
             Accept: 'application/json',
@@ -118,15 +119,23 @@ export function toPostmarkRequest(message: EmailMessage, context: SendContext, m
   const body: Record<string, unknown> = {
     From: formatAddress(message.from),
     To: to.map(formatAddress).join(', '),
-    Subject: message.subject,
     Metadata: { ...message.metadata, [MESSAGE_ID_KEY]: context.messageId },
   };
+  if (message.template) {
+    // A number is a template id; anything else, its alias. The template brings subject and bodies.
+    const id = message.template.id;
+    if (/^\d+$/.test(id)) body.TemplateId = Number(id);
+    else body.TemplateAlias = id;
+    body.TemplateModel = message.template.variables ?? {};
+  } else {
+    body.Subject = message.subject;
+  }
   if (messageStream) body.MessageStream = messageStream;
   if (message.cc?.length) body.Cc = message.cc.map(formatAddress).join(', ');
   if (message.bcc?.length) body.Bcc = message.bcc.map(formatAddress).join(', ');
   if (message.replyTo) body.ReplyTo = formatAddress(message.replyTo);
-  if (message.html !== undefined) body.HtmlBody = message.html;
-  if (message.text !== undefined) body.TextBody = message.text;
+  if (!message.template && message.html !== undefined) body.HtmlBody = message.html;
+  if (!message.template && message.text !== undefined) body.TextBody = message.text;
   if (message.tags?.[0]) body.Tag = message.tags[0];
   if (message.headers && Object.keys(message.headers).length) {
     body.Headers = Object.entries(message.headers).map(([Name, Value]) => ({ Name, Value }));

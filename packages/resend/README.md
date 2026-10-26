@@ -42,6 +42,11 @@ await relayo.email.send({ ...message, idempotencyKey: `invoice-${invoice.id}` })
 | 409 `concurrent_idempotent_requests`, `resource_locked`; 5xx; network errors | `ProviderUnavailableError` | yes |
 | Other 4xx (400, 409 `invalid_idempotent_request`, 422) | `ValidationError` | no |
 
+## Templates and scheduling
+
+`template: { id, variables }` sends a published Resend template (by id or alias); Resend refuses `html` or
+`text` alongside it. `sendAt` becomes `scheduled_at`, up to 30 days ahead.
+
 ## Receiving events
 
 Add a webhook in the Resend dashboard pointing at your endpoint, copy its signing secret into

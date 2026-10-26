@@ -45,6 +45,11 @@ const relayo = createRelayo({
 | 5xx, network errors | `ProviderUnavailableError` | yes |
 | Other 4xx | `ValidationError` | no |
 
+## Templates and scheduling
+
+`template: { id, variables }` sends a template stored in Mailgun (`template`, with the variables as
+`t:variables`). `sendAt` becomes `o:deliverytime`: Mailgun schedules up to 7 days ahead, or 3 on some plans.
+
 ## Receiving events
 
 In Mailgun, add webhooks for the events you want pointing at your endpoint, copy the HTTP webhook signing

@@ -152,3 +152,19 @@ describe('webhooks', () => {
     ).resolves.toHaveLength(1);
   });
 });
+
+describe('postmark templates', () => {
+  it('posts to /email/withTemplate with the alias or the id, and the model', async () => {
+    const fetch = vi.fn(async (_url: string | URL | Request, _init?: RequestInit) => Response.json({ MessageID: 'pm-1', ErrorCode: 0 }));
+    const relayo = createRelayo({ email: postmark({ serverToken: 'token', fetch }) });
+    await relayo.email.send({ ...{ from: { address: 'facturas@empresa.com' }, to: { address: 'ana@ejemplo.com' } }, template: { id: 'bienvenida', variables: { nombre: 'Ana' } } });
+    expect(fetch.mock.calls[0]![0]).toBe('https://api.postmarkapp.com/email/withTemplate');
+    const body = JSON.parse(fetch.mock.calls[0]![1]!.body as string) as Record<string, unknown>;
+    expect(body).toMatchObject({ TemplateAlias: 'bienvenida', TemplateModel: { nombre: 'Ana' } });
+    expect(body).not.toHaveProperty('Subject');
+    expect(body).not.toHaveProperty('HtmlBody');
+
+    expect(toPostmarkRequest({ ...{ from: { address: 'facturas@empresa.com' }, to: { address: 'ana@ejemplo.com' } }, template: { id: '4012' } }, { messageId: 'm' })).toMatchObject({ TemplateId: 4012, TemplateModel: {} });
+    await expect(relayo.email.send({ ...{ from: { address: 'facturas@empresa.com' }, to: { address: 'ana@ejemplo.com' } }, subject: 's', text: 't', sendAt: new Date(Date.now() + 60_000) })).rejects.toThrow(/does not support scheduling/);
+  });
+});

@@ -193,3 +193,14 @@ describe('webhooks', () => {
     ).resolves.toHaveLength(1);
   });
 });
+
+describe('resend templates and scheduling', () => {
+  it('sends a published template with its variables, and scheduled_at in ISO', () => {
+    const at = new Date(Date.now() + 86_400_000);
+    const body = toResendRequest({ ...{ from: { address: 'facturas@empresa.com' }, to: { address: 'ana@ejemplo.com' } }, template: { id: 'welcome', variables: { NOMBRE: 'Ana' } }, sendAt: at }, { messageId: 'm' });
+    expect(body).toMatchObject({ template: { id: 'welcome', variables: { NOMBRE: 'Ana' } }, scheduled_at: at.toISOString() });
+    expect(body).not.toHaveProperty('subject');
+    expect(() => toResendRequest({ ...{ from: { address: 'facturas@empresa.com' }, to: { address: 'ana@ejemplo.com' } }, template: { id: 'welcome' }, html: '<p>x</p>' }, { messageId: 'm' })).toThrow(/html or text/);
+    expect(() => toResendRequest({ ...{ from: { address: 'facturas@empresa.com' }, to: { address: 'ana@ejemplo.com' } }, subject: 's', text: 't', sendAt: new Date(Date.now() + 31 * 86_400_000) }, { messageId: 'm' })).toThrow(/30 days/);
+  });
+});

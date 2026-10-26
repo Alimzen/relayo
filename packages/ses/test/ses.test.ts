@@ -304,3 +304,14 @@ describe('webhooks through SNS', () => {
     expect(event).toMatchObject({ id: 'eb-1:0', type: 'bounced' });
   });
 });
+
+describe('ses templates', () => {
+  it('sends a stored template by name or ARN, with TemplateData and Relayo headers', () => {
+    const input = toSendEmailInput({ ...{ from: { address: 'facturas@empresa.com' }, to: { address: 'ana@ejemplo.com' } }, template: { id: 'Factura', variables: { total: '35,09 €' } }, metadata: { k: 'v' } }, { messageId: 'm' });
+    expect(input.Content?.Simple).toBeUndefined();
+    expect(input.Content?.Template).toMatchObject({ TemplateName: 'Factura', TemplateData: '{"total":"35,09 €"}' });
+    expect(input.Content?.Template?.Headers?.map((h) => h.Name)).toContain('X-Relayo-Message-ID');
+    const byArn = toSendEmailInput({ ...{ from: { address: 'facturas@empresa.com' }, to: { address: 'ana@ejemplo.com' } }, template: { id: 'arn:aws:ses:eu-west-1:123:template/Factura' } }, { messageId: 'm' });
+    expect(byArn.Content?.Template).toMatchObject({ TemplateArn: 'arn:aws:ses:eu-west-1:123:template/Factura', TemplateData: '{}' });
+  });
+});

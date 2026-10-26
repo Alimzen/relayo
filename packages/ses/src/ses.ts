@@ -92,6 +92,8 @@ export function ses(options: SesDriverOptions = {}): SesDriver {
       scheduling: false,
       tracking: true,
       webhooks: true,
+      // SES templates, by name or ARN, filled with TemplateData.
+      templates: true,
     },
 
     async send(message, context) {
@@ -162,17 +164,26 @@ export function toSendEmailInput(
       ...(message.cc && { CcAddresses: message.cc.map(formatAddress) }),
       ...(message.bcc && { BccAddresses: message.bcc.map(formatAddress) }),
     },
-    Content: {
-      Simple: {
-        Subject: { Data: message.subject, Charset: 'UTF-8' },
-        Body: {
-          ...(message.html !== undefined && { Html: { Data: message.html, Charset: 'UTF-8' } }),
-          ...(message.text !== undefined && { Text: { Data: message.text, Charset: 'UTF-8' } }),
+    Content: message.template
+      ? {
+          Template: {
+            ...(message.template.id.startsWith('arn:') ? { TemplateArn: message.template.id } : { TemplateName: message.template.id }),
+            TemplateData: JSON.stringify(message.template.variables ?? {}),
+            Headers: headers,
+            ...(message.attachments && { Attachments: message.attachments.map(toAttachment) }),
+          },
+        }
+      : {
+          Simple: {
+            Subject: { Data: message.subject ?? '', Charset: 'UTF-8' },
+            Body: {
+              ...(message.html !== undefined && { Html: { Data: message.html, Charset: 'UTF-8' } }),
+              ...(message.text !== undefined && { Text: { Data: message.text, Charset: 'UTF-8' } }),
+            },
+            Headers: headers,
+            ...(message.attachments && { Attachments: message.attachments.map(toAttachment) }),
+          },
         },
-        Headers: headers,
-        ...(message.attachments && { Attachments: message.attachments.map(toAttachment) }),
-      },
-    },
     EmailTags: tags,
     ...(options.configurationSetName && { ConfigurationSetName: options.configurationSetName }),
   };

@@ -61,7 +61,8 @@ export function resend(options: ResendDriverOptions): Driver<EmailMessage> {
   return {
     name,
     channel: 'email',
-    capabilities: { batch: false, attachments: true, scheduling: true, tracking: true, webhooks: true },
+    // Published templates (template: { id, variables }) and scheduled_at, up to 30 days ahead.
+    capabilities: { batch: false, attachments: true, scheduling: true, tracking: true, webhooks: true, templates: true },
 
     async send(message, context) {
       const headers: Record<string, string> = {
@@ -125,9 +126,21 @@ export function toResendRequest(message: EmailMessage, context: SendContext): Re
   const body: Record<string, unknown> = {
     from: formatAddress(message.from),
     to: to.map(formatAddress),
-    subject: message.subject,
+    // A template may bring a default subject.
+    ...(message.subject !== undefined && { subject: message.subject }),
     tags,
   };
+  if (message.template) {
+    // Resend refuses html or text alongside a template.
+    if (message.html !== undefined || message.text !== undefined) {
+      throw new ValidationError('Resend does not take html or text with a template: the template brings the content');
+    }
+    body.template = { id: message.template.id, ...(message.template.variables && { variables: message.template.variables }) };
+  }
+  if (message.sendAt) {
+    if (message.sendAt.getTime() > Date.now() + 30 * 86_400_000) throw new ValidationError('Resend can schedule a send at most 30 days ahead');
+    body.scheduled_at = message.sendAt.toISOString();
+  }
   if (message.cc?.length) body.cc = message.cc.map(formatAddress);
   if (message.bcc?.length) body.bcc = message.bcc.map(formatAddress);
   if (message.replyTo) body.reply_to = formatAddress(message.replyTo);

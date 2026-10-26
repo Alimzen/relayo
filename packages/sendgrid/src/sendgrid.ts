@@ -67,9 +67,12 @@ export function sendgrid(options: SendGridDriverOptions): Driver<EmailMessage> {
     capabilities: {
       batch: false,
       attachments: true,
-      scheduling: false,
+      // send_at, up to 72 hours ahead.
+      scheduling: true,
       tracking: true,
       webhooks: true,
+      // Dynamic templates (d-…), filled with dynamic_template_data.
+      templates: true,
     },
 
     async send(message, context) {
@@ -147,6 +150,7 @@ export function toSendGridRequest(
   const personalization: Record<string, unknown> = { to: to.map(toAddress) };
   if (message.cc?.length) personalization.cc = message.cc.map(toAddress);
   if (message.bcc?.length) personalization.bcc = message.bcc.map(toAddress);
+  if (message.template?.variables) personalization.dynamic_template_data = message.template.variables;
 
   // SendGrid requires text/plain before text/html.
   const content: Array<{ type: string; value: string }> = [];
@@ -156,10 +160,13 @@ export function toSendGridRequest(
   const body: Record<string, unknown> = {
     personalizations: [personalization],
     from: toAddress(message.from),
-    subject: message.subject,
-    content,
+    // A dynamic template brings its own subject and content.
+    ...(message.subject !== undefined && { subject: message.subject }),
+    ...(content.length && { content }),
+    ...(message.template && { template_id: message.template.id }),
     custom_args: customArgs,
   };
+  if (message.sendAt) body.send_at = sendAt(message.sendAt);
   if (message.replyTo) body.reply_to = toAddress(message.replyTo);
   if (message.headers && Object.keys(message.headers).length) body.headers = message.headers;
   if (tags.length) body.categories = tags;
@@ -176,6 +183,16 @@ export function toSendGridRequest(
 
   return { ...body, ...message.providerOptions };
 }
+
+/** SendGrid takes a unix time in seconds, at most 72 hours ahead. */
+function sendAt(date: Date): number {
+  if (date.getTime() > Date.now() + MAX_SCHEDULE_MS) {
+    throw new ValidationError('SendGrid can schedule a send at most 72 hours ahead');
+  }
+  return Math.floor(date.getTime() / 1000);
+}
+
+const MAX_SCHEDULE_MS = 72 * 3_600_000;
 
 function toAddress(recipient: Recipient): SendGridAddress {
   return recipient.name ? { email: recipient.address, name: recipient.name } : { email: recipient.address };

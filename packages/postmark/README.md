@@ -42,6 +42,12 @@ const relayo = createRelayo({
 | 5xx, ErrorCode 100/101, network errors | `ProviderUnavailableError` | yes |
 | Other 422 (ErrorCode 300, 403...) | `ValidationError` | no |
 
+## Templates
+
+`template: { id, variables }` posts to `/email/withTemplate`: a numeric id goes as `TemplateId`, anything else
+as `TemplateAlias`, and the variables as `TemplateModel`; the template brings subject and bodies. Postmark has
+no scheduled sending, so `sendAt` is refused (with `failover()`, such messages go to a driver that has it).
+
 ## Receiving events
 
 **Postmark does not sign webhooks.** Protect your endpoint with HTTP basic auth: in Postmark, set the

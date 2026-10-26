@@ -184,3 +184,20 @@ describe('webhooks', () => {
     ).resolves.toHaveLength(1);
   });
 });
+
+describe('mailgun templates and scheduling', () => {
+  it('sends a stored template with t:variables, and o:deliverytime in RFC 2822', () => {
+    const at = new Date('2030-01-04T09:30:00Z');
+    vi.useFakeTimers({ now: new Date('2030-01-03T09:00:00Z') });
+    try {
+      const form = toMailgunForm({ ...{ from: { address: 'facturas@empresa.com' }, to: { address: 'ana@ejemplo.com' } }, template: { id: 'factura', variables: { total: '35,09 €' } }, sendAt: at }, { messageId: 'm' });
+      expect(form.get('template')).toBe('factura');
+      expect(JSON.parse(form.get('t:variables') as string)).toEqual({ total: '35,09 €' });
+      expect(form.get('o:deliverytime')).toBe('Fri, 04 Jan 2030 09:30:00 +0000');
+      expect(form.has('subject')).toBe(false);
+      expect(() => toMailgunForm({ ...{ from: { address: 'facturas@empresa.com' }, to: { address: 'ana@ejemplo.com' } }, subject: 's', text: 't', sendAt: new Date('2030-01-11T09:00:00Z') }, { messageId: 'm' })).toThrow(/7 days/);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+});

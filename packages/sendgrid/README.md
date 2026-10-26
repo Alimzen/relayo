@@ -47,6 +47,12 @@ Results have `status: 'queued'` and the `X-Message-Id` as `providerMessageId`. R
 
 SendGrid's error list is in `error.raw.errors`.
 
+## Templates and scheduling
+
+`template: { id: 'd-…', variables }` sends a SendGrid dynamic template: `template_id`, with the variables as
+`dynamic_template_data`; the template brings subject and content. `sendAt` becomes `send_at` (SendGrid
+schedules up to 72 hours ahead; later dates are refused before sending).
+
 ## Receiving events
 
 1. In SendGrid, go to **Settings → Mail Settings → Event Webhook**, set your endpoint URL and choose the

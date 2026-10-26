@@ -65,7 +65,8 @@ export function mailgun(options: MailgunDriverOptions): Driver<EmailMessage> {
   return {
     name,
     channel: 'email',
-    capabilities: { batch: false, attachments: true, scheduling: true, tracking: true, webhooks: true },
+    // Stored templates (template + t:variables) and o:deliverytime, 3 or 7 days ahead depending on the plan.
+    capabilities: { batch: false, attachments: true, scheduling: true, tracking: true, webhooks: true, templates: true },
 
     async send(message, context) {
       let response: Response;
@@ -109,6 +110,12 @@ export function mailgun(options: MailgunDriverOptions): Driver<EmailMessage> {
   };
 }
 
+/** Mailgun schedules up to 7 days ahead (3 on some plans), in RFC 2822: `Fri, 14 Oct 2011 12:00:00 +0000`. */
+function deliveryTime(date: Date): string {
+  if (date.getTime() > Date.now() + 7 * 86_400_000) throw new ValidationError('Mailgun can schedule a send at most 7 days ahead (3 on some plans)');
+  return date.toUTCString().replace(/GMT$/, '+0000');
+}
+
 export function toMailgunForm(message: EmailMessage, context: SendContext): FormData {
   if ((message.tags?.length ?? 0) > MAX_TAGS) {
     throw new ValidationError(`Mailgun accepts at most ${MAX_TAGS} tags per message; got ${message.tags!.length}`);
@@ -119,9 +126,15 @@ export function toMailgunForm(message: EmailMessage, context: SendContext): Form
   for (const r of to) form.append('to', formatAddress(r));
   for (const r of message.cc ?? []) form.append('cc', formatAddress(r));
   for (const r of message.bcc ?? []) form.append('bcc', formatAddress(r));
-  form.append('subject', message.subject);
+  // A template may bring its own subject.
+  if (message.subject !== undefined) form.append('subject', message.subject);
   if (message.text !== undefined) form.append('text', message.text);
   if (message.html !== undefined) form.append('html', message.html);
+  if (message.template) {
+    form.append('template', message.template.id);
+    if (message.template.variables) form.append('t:variables', JSON.stringify(message.template.variables));
+  }
+  if (message.sendAt) form.append('o:deliverytime', deliveryTime(message.sendAt));
   if (message.replyTo) form.append('h:Reply-To', formatAddress(message.replyTo));
   for (const [key, value] of Object.entries(message.headers ?? {})) form.append(`h:${key}`, value);
   for (const tag of message.tags ?? []) form.append('o:tag', tag);

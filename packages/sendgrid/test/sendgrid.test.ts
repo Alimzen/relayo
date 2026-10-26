@@ -239,3 +239,23 @@ describe('Event Webhook', () => {
     expect(events[0]).toMatchObject({ provider: 'sendgrid-main' });
   });
 });
+
+describe('sendgrid templates and scheduling', () => {
+  it('sends a dynamic template with its data, without subject or content', () => {
+    const body = toSendGridRequest(
+      { ...{ from: { address: 'facturas@empresa.com' }, to: { address: 'ana@ejemplo.com' } }, template: { id: 'd-123', variables: { nombre: 'Ana' } } },
+      { messageId: 'm' },
+    ) as { template_id: string; personalizations: Array<Record<string, unknown>>; subject?: string; content?: unknown };
+    expect(body.template_id).toBe('d-123');
+    expect(body.personalizations[0]!.dynamic_template_data).toEqual({ nombre: 'Ana' });
+    expect(body).not.toHaveProperty('subject');
+    expect(body).not.toHaveProperty('content');
+  });
+
+  it('schedules with send_at in unix seconds, up to 72 hours ahead', () => {
+    const at = new Date(Math.ceil(Date.now() / 1000) * 1000 + 3_600_000);
+    const body = toSendGridRequest({ ...{ from: { address: 'facturas@empresa.com' }, to: { address: 'ana@ejemplo.com' } }, subject: 's', text: 't', sendAt: at }, { messageId: 'm' }) as { send_at: number };
+    expect(body.send_at).toBe(at.getTime() / 1000);
+    expect(() => toSendGridRequest({ ...{ from: { address: 'facturas@empresa.com' }, to: { address: 'ana@ejemplo.com' } }, subject: 's', text: 't', sendAt: new Date(Date.now() + 73 * 3_600_000) }, { messageId: 'm' })).toThrow(/72 hours/);
+  });
+});
