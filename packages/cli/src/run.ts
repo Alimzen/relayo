@@ -1,6 +1,7 @@
-import { readFile } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
 import { parseArgs, type ParseArgsConfig } from 'node:util';
-import { SimApiError, SimClient, type EventType, type MessageDetail, type SimEvent, type SimMessage } from './client.js';
+import { SimApiError, SimClient, type EventType, type MessageDetail, type SimEvent, type SimMessage, type Template, type TemplateInput } from './client.js';
 
 export interface Io {
   env: Record<string, string | undefined>;
@@ -18,23 +19,25 @@ const EVENT_TYPES = new Set<string>([
   'accepted', 'delivered', 'deferred', 'bounced', 'complained', 'rejected', 'opened', 'clicked', 'unsubscribed', 'failed',
 ]);
 
-export const HELP = `relayo: command line for Relayo Sim, the email delivery simulator.
+export const HELP = `relayo: command line for Relayo, with test keys (the simulator) or live keys (real delivery).
 
 Usage: relayo <command> [options]
 
 Commands
   scenarios                     List the simulator's scenarios
-  send --to <address>...        Send a test message (see "relayo send --help")
+  send --to <address>...        Send a message, or a saved template (see "relayo send --help")
   messages                      Latest messages with their status
   show <message-id>             A message and its event timeline
   wait [<message-id>] --for <event>[:<bounce-type>]
                                 Wait until an event happens; exit 1 on timeout
+  tail                          Follow events as they happen (or --requests: the API request log)
+  templates list|show|pull|push Saved templates, to keep them in your repository
   report                        Summary of the messages since a moment (text or markdown)
 
 Configuration (flags win over environment)
-  --url <url>        RELAYO_SIM_URL       Base URL of Relayo Sim
-  --api-key <key>    RELAYO_SIM_API_KEY   A project's API key
-  --json                                 Machine-readable output
+  --url <url>        RELAYO_URL (or RELAYO_SIM_URL)          Base URL: https://relayo.alimzen.com, or yours
+  --api-key <key>    RELAYO_API_KEY (or RELAYO_SIM_API_KEY)  A project's API key: rly_test_… or rly_live_…
+  --json                                                    Machine-readable output
 
 Exit codes: 0 ok · 1 expectation not met · 2 usage or configuration · 3 API error
 `;
@@ -107,6 +110,8 @@ const COMMANDS: Record<string, Command> = {
       text: { type: 'string' },
       'html-file': { type: 'string' },
       scenario: { type: 'string' },
+      template: { type: 'string' },
+      var: { type: 'string', multiple: true },
     });
     if (values.help) {
       return help(
@@ -119,19 +124,28 @@ const COMMANDS: Record<string, Command> = {
   --text <text>        Plain text body
   --html-file <path>   HTML body from a file
   --scenario <name>    Scenario for every recipient (X-Sim-Scenario), e.g. greylist+3
+  --template <alias>   Send a saved template instead (its subject and content)
+  --var <name=value>   A template variable; repeat for several (--var nombre=Ana --var pedido=42)
 
-Prints the simulator's message id, to use with "show" and "wait".
+With a live key (rly_live_…) the email is really delivered: --from is required, from a domain your
+connection or Relayo's sending can send from.
+
+Prints the message id, to use with "show" and "wait".
 `,
       );
     }
     if (!values.to?.length) throw new UsageError('send needs at least one --to address.');
+    const sim = client(values, io);
+    if (sim.live && !values.from) throw new UsageError('A live key really delivers: pass --from with an address of a domain you can send from.');
     const html = values['html-file'] ? await readFile(values['html-file'], 'utf8') : undefined;
-    const { id } = await client(values, io).send({
+    const variables = values.var ? variablesOf(values.var) : undefined;
+    if (variables && !values.template) throw new UsageError('--var fills a template: pass --template <alias> too.');
+    const { id } = await sim.send({
       from: values.from ?? 'test@relayo.dev',
       to: values.to,
-      subject: values.subject ?? 'Relayo CLI test',
-      text: values.text ?? 'Sent with the relayo CLI.',
-      ...(html !== undefined && { html }),
+      ...(values.template
+        ? { template: values.template, ...(variables && { variables }), ...(values.subject && { subject: values.subject }) }
+        : { subject: values.subject ?? 'Relayo CLI test', text: values.text ?? 'Sent with the relayo CLI.', ...(html !== undefined && { html }) }),
       ...(values.scenario && { headers: { 'X-Sim-Scenario': values.scenario } }),
     });
     if (values.json) return json(io, { id });
@@ -256,6 +270,142 @@ Examples
     return EXIT.failed;
   },
 
+  async tail(args, io) {
+    const { values } = parse(args, {
+      requests: { type: 'boolean' },
+      since: { type: 'string' },
+      interval: { type: 'string' },
+      timeout: { type: 'string' },
+    });
+    if (values.help) {
+      return help(
+        io,
+        `relayo tail [--requests] [--since <time>] [--interval 2s] [--timeout <time>] [--json]
+
+Prints each event of the project's messages as it happens (delivered, bounced, opened…), until
+stopped with Ctrl+C or --timeout. With --json, one JSON object per line.
+
+  --requests        The API request log instead: each request made with the project's keys
+  --since <time>    Also print what happened since then (default: only what comes next)
+  --interval <time> Time between checks (default 2s)
+`,
+      );
+    }
+    const sim = client(values, io);
+    const now = io.now ?? Date.now;
+    const sleep = io.sleep ?? ((ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms)));
+    const interval = duration(values.interval ?? '2s', '--interval');
+    const deadline = values.timeout ? now() + duration(values.timeout, '--timeout') : Infinity;
+    const from = values.since ? sinceDate(values.since, io).getTime() : now();
+    const seen = new Set<string>();
+    const latest = new Map<string, string>();
+    const print = (line: string, value: unknown) => io.out(values.json ? `${JSON.stringify(value)}\n` : `${line}\n`);
+
+    for (;;) {
+      if (values.requests) {
+        const requests = (await sim.requests({ limit: 100 })).reverse();
+        for (const r of requests) {
+          if (seen.has(r.id) || Date.parse(r.createdAt) < from) continue;
+          seen.add(r.id);
+          print(`${clock(r.createdAt)}  ${r.status}  ${r.method} ${r.path}  ${r.keyName}  ${r.durationMs} ms${r.error ? `  ${r.error}` : ''}`, r);
+        }
+      } else {
+        // Only the messages whose status changed are read again.
+        const messages = await collect(sim, { limit: 100, since: new Date(Math.min(from, now() - 3_600_000)) });
+        for (const m of messages.reverse()) {
+          const key = JSON.stringify(m.latest ?? null);
+          if (latest.get(m.id) === key) continue;
+          latest.set(m.id, key);
+          const detail = await sim.message(m.id);
+          for (const e of detail.events) {
+            if (seen.has(e.id) || Date.parse(e.timestamp) < from) continue;
+            seen.add(e.id);
+            print(`${clock(e.timestamp)}  ${eventLabel(e).padEnd(22)}  ${e.recipient}  ${m.id}  ${m.subject}`, { messageId: m.id, subject: m.subject, ...e });
+          }
+        }
+      }
+      if (now() >= deadline) return EXIT.ok;
+      await sleep(Math.min(interval, Math.max(0, deadline - now())));
+    }
+  },
+
+  async templates(args, io) {
+    const [action, ...rest] = args;
+    const { values, positionals } = parse(rest, { dir: { type: 'string' }, 'html-file': { type: 'string' } }, true);
+    if (!action || action === '--help' || action === '-h' || values.help) {
+      return help(
+        io,
+        `relayo templates <list | show <alias> | pull <alias> | push <alias.json>> [options]
+
+  list                  The project's templates
+  show <alias>          One template, with its content
+  pull <alias>          Writes <alias>.json (subject, name, text…) and <alias>.html into --dir (default .)
+  push <alias.json>     Creates the template, or updates it, from those files: the HTML from
+                        <alias>.html next to it, or --html-file. Keep them in your repository and push
+                        them in CI: content changes without deploying your app.
+`,
+      );
+    }
+    const sim = client(values, io);
+    switch (action) {
+      case 'list': {
+        const templates = await sim.templates();
+        if (values.json) return json(io, templates);
+        if (!templates.length) {
+          io.out('No templates.\n');
+          return EXIT.ok;
+        }
+        io.out(table(['ALIAS', 'CHANNEL', 'VARIABLES', 'UPDATED'], templates.map((t) => [t.alias, t.channel, t.variables.join(', ') || '—', t.updatedAt])));
+        return EXIT.ok;
+      }
+      case 'show': {
+        const template = await found(sim, positionals[0]);
+        if (values.json) return json(io, template);
+        io.out(`${template.alias} (${template.channel})${template.name !== template.alias ? ` · ${template.name}` : ''}\n`);
+        if (template.subject !== undefined) io.out(`Subject: ${template.subject}\n`);
+        io.out(`Variables: ${template.variables.join(', ') || '—'}\n`);
+        for (const part of [template.body, template.text, template.html]) if (part) io.out(`\n${part}\n`);
+        return EXIT.ok;
+      }
+      case 'pull': {
+        const template = await found(sim, positionals[0]);
+        const dir = values.dir ?? '.';
+        // What push sends back: the HTML goes in its own file.
+        const { alias, name, channel, subject, text, body, html } = template;
+        const kept = { alias, name, channel, ...(subject !== undefined && { subject }), ...(text !== undefined && { text }), ...(body !== undefined && { body }) };
+        const written = [join(dir, `${template.alias}.json`)];
+        await writeFile(written[0]!, `${JSON.stringify(kept, null, 2)}\n`);
+        if (html) {
+          written.push(join(dir, `${template.alias}.html`));
+          await writeFile(written[1]!, html);
+        }
+        if (values.json) return json(io, { written });
+        io.out(`${written.join('\n')}\n`);
+        return EXIT.ok;
+      }
+      case 'push': {
+        const file = positionals[0];
+        if (!file?.endsWith('.json')) throw new UsageError('push needs the template\'s .json file (from "relayo templates pull").');
+        const input = JSON.parse(await readFile(file, 'utf8')) as TemplateInput;
+        if (!input.alias) throw new UsageError(`${file} has no "alias".`);
+        const htmlFile = values['html-file'] ?? file.replace(/\.json$/, '.html');
+        const html = await readFile(htmlFile, 'utf8').catch((error: NodeJS.ErrnoException) => {
+          if (error.code === 'ENOENT' && !values['html-file']) return undefined;
+          throw new UsageError(`Cannot read ${htmlFile}: ${error.message}`);
+        });
+        // HTML from a file replaces what the panel's visual editor built.
+        const body: TemplateInput = { ...input, ...(html !== undefined && { html, design: null }) };
+        const exists = await sim.template(input.alias);
+        const saved = exists ? await sim.updateTemplate(input.alias, body) : await sim.createTemplate(body);
+        if (values.json) return json(io, saved);
+        io.out(`${exists ? 'Updated' : 'Created'} ${saved.alias}${saved.variables.length ? ` (variables: ${saved.variables.join(', ')})` : ''}\n`);
+        return EXIT.ok;
+      }
+      default:
+        throw new UsageError(`Unknown templates action "${action}": list, show, pull or push.`);
+    }
+  },
+
   async report(args, io) {
     const { values } = parse(args, { since: { type: 'string' }, format: { type: 'string' }, limit: { type: 'string' } });
     if (values.help) {
@@ -309,13 +459,46 @@ function parse<O extends Options>(args: string[], options: O, allowPositionals =
   };
 }
 
-function client(values: { url?: string | undefined; 'api-key'?: string | undefined }, io: Io): SimClient {
-  const url = values.url ?? io.env.RELAYO_SIM_URL;
-  const apiKey = values['api-key'] ?? io.env.RELAYO_SIM_API_KEY;
-  if (!url) throw new UsageError('Missing the simulator URL: set RELAYO_SIM_URL or pass --url.');
-  if (!/^https?:\/\//.test(url)) throw new UsageError(`The simulator URL must start with http:// or https:// (got "${url}").`);
-  if (!apiKey) throw new UsageError('Missing the API key: set RELAYO_SIM_API_KEY or pass --api-key.');
-  return new SimClient(url, apiKey, io.fetch);
+function client(values: { url?: string | undefined; 'api-key'?: string | undefined }, io: Io): SimClient & { live: boolean } {
+  // No default host: an API key is only sent where it was told to go.
+  const url = values.url ?? io.env.RELAYO_URL ?? io.env.RELAYO_SIM_URL;
+  const apiKey = values['api-key'] ?? io.env.RELAYO_API_KEY ?? io.env.RELAYO_SIM_API_KEY;
+  if (!url) throw new UsageError('Missing the URL: set RELAYO_URL (https://relayo.alimzen.com, or your own) or pass --url.');
+  if (!/^https?:\/\//.test(url)) throw new UsageError(`The URL must start with http:// or https:// (got "${url}").`);
+  if (!apiKey) throw new UsageError('Missing the API key: set RELAYO_API_KEY or pass --api-key.');
+  return Object.assign(new SimClient(url, apiKey, io.fetch), { live: apiKey.startsWith('rly_live_') });
+}
+
+/** --var name=value pairs; values that read as JSON (numbers, true, objects) are parsed. */
+function variablesOf(pairs: string[]): Record<string, unknown> {
+  const variables: Record<string, unknown> = {};
+  for (const pair of pairs) {
+    const eq = pair.indexOf('=');
+    if (eq < 1) throw new UsageError(`--var takes name=value (got "${pair}").`);
+    const raw = pair.slice(eq + 1);
+    let value: unknown = raw;
+    if (/^(-?\d+(\.\d+)?|true|false|null|\{.*\}|\[.*\])$/s.test(raw)) {
+      try {
+        value = JSON.parse(raw);
+      } catch {
+        value = raw;
+      }
+    }
+    variables[pair.slice(0, eq)] = value;
+  }
+  return variables;
+}
+
+async function found(sim: SimClient, alias: string | undefined): Promise<Template> {
+  if (!alias) throw new UsageError('Which template? Pass its alias.');
+  const template = await sim.template(alias);
+  if (!template) throw new UsageError(`The project has no template "${alias}".`);
+  return template;
+}
+
+/** HH:MM:SS of an ISO date, in the local time zone. */
+function clock(iso: string): string {
+  return new Date(iso).toTimeString().slice(0, 8);
 }
 
 function help(io: Io, text: string): number {

@@ -1,4 +1,4 @@
-/** What the CLI needs from the Relayo Sim HTTP API. */
+/** What the CLI needs from the Relayo HTTP API (Relayo Sim, test or live keys). */
 
 export type EventType =
   | 'accepted'
@@ -53,10 +53,42 @@ export interface Scenario {
 export interface SendInput {
   from: string;
   to: string[];
-  subject: string;
+  subject?: string;
   text?: string;
   html?: string;
   headers?: Record<string, string>;
+  /** A saved template (alias or id) and its variables. */
+  template?: string;
+  variables?: Record<string, unknown>;
+}
+
+export interface Template {
+  id: string;
+  alias: string;
+  name: string;
+  channel: 'email' | 'sms';
+  subject?: string;
+  html?: string;
+  text?: string;
+  body?: string;
+  variables: string[];
+  updatedAt: string;
+}
+
+/** What can be sent to create or change a template; `design: null` drops the visual editor's blocks. */
+export type TemplateInput = Partial<Pick<Template, 'alias' | 'name' | 'channel' | 'subject' | 'html' | 'text' | 'body'>> & { design?: null };
+
+/** A request made with an API key, from the project's request log. */
+export interface ApiRequest {
+  id: string;
+  keyName: string;
+  mode: 'test' | 'live';
+  method: string;
+  path: string;
+  status: number;
+  durationMs: number;
+  error?: string;
+  createdAt: string;
 }
 
 export interface MessageQuery {
@@ -103,6 +135,35 @@ export class SimClient {
 
   message(id: string): Promise<MessageDetail> {
     return this.request('GET', `/v1/messages/${encodeURIComponent(id)}`);
+  }
+
+  templates(): Promise<Template[]> {
+    return this.request<{ data: Template[] }>('GET', '/v1/project/templates').then((r) => r.data);
+  }
+
+  /** The template, or undefined when the project has none with that alias or id. */
+  async template(ref: string): Promise<Template | undefined> {
+    try {
+      return await this.request<Template>('GET', `/v1/project/templates/${encodeURIComponent(ref)}`);
+    } catch (error) {
+      if (error instanceof SimApiError && error.status === 404) return undefined;
+      throw error;
+    }
+  }
+
+  createTemplate(input: TemplateInput): Promise<Template> {
+    return this.request('POST', '/v1/project/templates', input);
+  }
+
+  updateTemplate(ref: string, input: TemplateInput): Promise<Template> {
+    return this.request('PATCH', `/v1/project/templates/${encodeURIComponent(ref)}`, input);
+  }
+
+  /** Newest first. */
+  requests(query: { limit?: number; status?: 'failed' } = {}): Promise<ApiRequest[]> {
+    const params = new URLSearchParams();
+    for (const [key, value] of Object.entries(query)) if (value !== undefined) params.set(key, String(value));
+    return this.request<{ data: ApiRequest[] }>('GET', `/v1/project/requests?${params}`).then((r) => r.data);
   }
 
   private async request<T>(method: string, path: string, body?: unknown): Promise<T> {
