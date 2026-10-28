@@ -32,6 +32,8 @@ relayo.on('bounced', (event) => {
 });
 ```
 
+**Documentation:** [alimzen.github.io/relayo](https://alimzen.github.io/relayo/), built from these READMEs.
+
 > **Status:** pre-release (0.x). APIs may still change.
 >
 > **Renamed:** the packages used to be `@alimzen/core`, `@alimzen/smtp`, `@alimzen/ses`… They are now `@alimzen/relayo` and `@alimzen/relayo-*` (same code and versions). Replace the names in your `package.json` and imports; the old packages are deprecated.
@@ -82,6 +84,7 @@ pnpm test        # all packages
 pnpm typecheck
 pnpm build       # dual ESM/CJS with tsup
 pnpm changeset   # describe a change for the next release
+pnpm --filter relayo-website dev   # the documentation site, from the READMEs
 ```
 
 Requires Node.js 20+ and pnpm 8+. Design notes, roadmap and architecture decisions (in Spanish) live in

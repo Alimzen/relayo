@@ -1,0 +1,5 @@
+guide/
+packages/
+.vitepress/sidebar.json
+.vitepress/cache/
+.vitepress/dist/
