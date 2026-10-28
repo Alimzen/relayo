@@ -1,6 +1,6 @@
 {
   "name": "@alimzen/relayo-mailgun",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Mailgun driver for Relayo: sending through the Mailgun API and normalized events from its signed webhooks.",
   "license": "MIT",
   "author": "Alimzen",

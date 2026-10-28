@@ -1,6 +1,6 @@
 {
   "name": "@alimzen/relayo-vonage",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Vonage SMS driver for Relayo: sending through the Vonage SMS API and normalized events from its delivery receipts.",
   "license": "MIT",
   "author": "Alimzen",

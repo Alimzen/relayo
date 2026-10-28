@@ -1,6 +1,6 @@
 {
   "name": "@alimzen/relayo-ses",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Amazon SES driver for Relayo: sending through SESv2 and normalized events from SNS.",
   "license": "MIT",
   "author": "Alimzen",

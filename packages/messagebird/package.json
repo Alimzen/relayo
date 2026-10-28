@@ -1,6 +1,6 @@
 {
   "name": "@alimzen/relayo-messagebird",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "MessageBird SMS driver for Relayo: sending through the MessageBird SMS API and normalized events from its signed status reports.",
   "license": "MIT",
   "author": "Alimzen",

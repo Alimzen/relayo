@@ -1,6 +1,6 @@
 {
   "name": "@alimzen/relayo-twilio",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Twilio SMS driver for Relayo: sending through the Twilio Messages API and normalized events from its signed status callbacks and STOP replies.",
   "license": "MIT",
   "author": "Alimzen",

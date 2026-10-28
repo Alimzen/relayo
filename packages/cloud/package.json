@@ -1,6 +1,6 @@
 {
   "name": "@alimzen/relayo-cloud",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Relayo Cloud driver: send email and SMS through the Relayo platform with one API key (rly_test_ to simulate, rly_live_ to deliver through your providers), and get every event through one signed webhook.",
   "license": "MIT",
   "author": "Alimzen",

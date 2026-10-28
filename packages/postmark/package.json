@@ -1,6 +1,6 @@
 {
   "name": "@alimzen/relayo-postmark",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Postmark driver for Relayo: sending through the Postmark API and normalized events from its webhooks.",
   "license": "MIT",
   "author": "Alimzen",
