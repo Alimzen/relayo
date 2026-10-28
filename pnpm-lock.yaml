@@ -152,6 +152,12 @@ importers:
         specifier: workspace:^
         version: link:../core
 
+  packages/vonage:
+    devDependencies:
+      '@alimzen/relayo':
+        specifier: workspace:^
+        version: link:../core
+
   website:
     devDependencies:
       vitepress:

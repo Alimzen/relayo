@@ -50,6 +50,7 @@ relayo.on('bounced', (event) => {
 | [`@alimzen/relayo-postmark`](packages/postmark) | Postmark API, webhooks with basic auth |
 | [`@alimzen/relayo-mailgun`](packages/mailgun) | Mailgun API (US and EU), signed webhooks |
 | [`@alimzen/relayo-twilio`](packages/twilio) | Twilio SMS, signed status callbacks and STOP replies |
+| [`@alimzen/relayo-vonage`](packages/vonage) | Vonage SMS API, delivery receipts mapped through `client-ref`, optional signatures |
 | [`@alimzen/relayo-cloud`](packages/cloud) | The Relayo platform as your provider: one key (test or live), failover across your providers, one webhook |
 | [`@alimzen/relayo-simulator`](packages/simulator) | Relayo Sim driver: realistic bounces, greylisting, complaints and more, for tests and CI |
 | [`@alimzen/relayo-bounces`](packages/bounces) | Bounce reports (DSN) and spam complaints (ARF) received by email, for your own mail server |
