@@ -66,6 +66,12 @@ importers:
         specifier: workspace:^
         version: link:../core
 
+  packages/messagebird:
+    devDependencies:
+      '@alimzen/relayo':
+        specifier: workspace:^
+        version: link:../core
+
   packages/nestjs:
     devDependencies:
       '@alimzen/relayo':
